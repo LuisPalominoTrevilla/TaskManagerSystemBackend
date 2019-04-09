@@ -46,6 +46,17 @@
         "summary": "Create a new account",
         "description": "",
         "operationId": "addAccount",
+        "parameters": [
+          {
+            "name": "account",
+            "in": "body",
+            "description": "Account to be created",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Account"
+            }
+          }
+        ],
         "consumes": [
           "application/json"
         ],
@@ -54,7 +65,10 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/Account"
+            }
           },
           "400": {
             "description": "Invalid input"
@@ -86,7 +100,14 @@
           "404": {
             "description": "Account not found"
           }
-        }
+        },
+        "security": [
+          {
+            "task_system_auth": [
+              "write:account"
+            ]
+          }
+        ]
       }
     },
     "/accounts/login": {
@@ -97,6 +118,17 @@
         "summary": "login a user to the system",
         "description": "",
         "operationId": "accountLogin",
+        "parameters": [
+          {
+            "name": "credentials",
+            "in": "body",
+            "description": "credentials to login",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Credentials"
+            }
+          }
+        ],
         "consumes": [
           "application/json"
         ],
@@ -105,7 +137,10 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/LoggedAccount"
+            }
           },
           "400": {
             "description": "Bad request"
@@ -166,12 +201,26 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Habit"
+              }
+            }
           },
           "404": {
             "description": "Account not found"
           }
-        }
+        },
+        "security": [
+          {
+            "task_system_auth": [
+              "read:account",
+              "read:habit"
+            ]
+          }
+        ]
       }
     },
     "/accounts/{accountId}/tasks": {
@@ -196,12 +245,26 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Task"
+              }
+            }
           },
           "404": {
             "description": "Account not found"
           }
-        }
+        },
+        "security": [
+          {
+            "task_system_auth": [
+              "read:account",
+              "read:task"
+            ]
+          }
+        ]
       }
     },
     "/habits": {
@@ -212,15 +275,48 @@
         "summary": "Create habit",
         "description": "",
         "operationId": "addHabit",
+        "parameters": [
+          {
+            "name": "habit",
+            "in": "formData",
+            "description": "Habit image",
+            "required": true,
+            "type": "file"
+          },
+          {
+            "name": "title",
+            "in": "formData",
+            "description": "Habit title",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "type",
+            "in": "formData",
+            "description": "Habit type",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "name": "difficulty",
+            "in": "formData",
+            "description": "Habit difficulty",
+            "required": true,
+            "type": "integer"
+          }
+        ],
         "consumes": [
-          "application/json"
+          "multipart/form-data"
         ],
         "produces": [
           "application/json"
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/Habit"
+            }
           },
           "400": {
             "description": "Incomplete data"
@@ -242,7 +338,13 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Task"
+              }
+            }
           },
           "401": {
             "description": "Unauthorized"
@@ -265,17 +367,48 @@
             "description": "Habit ID",
             "required": true,
             "type": "string"
+          },
+          {
+            "name": "habit",
+            "in": "formData",
+            "description": "Habit image",
+            "required": true,
+            "type": "file"
+          },
+          {
+            "name": "title",
+            "in": "formData",
+            "description": "Habit title",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "type",
+            "in": "formData",
+            "description": "Habit type",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "name": "difficulty",
+            "in": "formData",
+            "description": "Habit difficulty",
+            "required": true,
+            "type": "integer"
           }
         ],
         "consumes": [
-          "application/json"
+          "multipart/form-data"
         ],
         "produces": [
           "application/json"
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/Habit"
+            }
           },
           "400": {
             "description": "Incomplete data"
@@ -340,7 +473,10 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/Habit"
+            }
           },
           "401": {
             "description": "Unauthorized"
@@ -366,17 +502,24 @@
             "description": "Habit ID",
             "required": true,
             "type": "string"
+          },
+          {
+            "name": "completion_type",
+            "in": "query",
+            "required": true,
+            "description": "How the habit was completed",
+            "type": "integer"
           }
-        ],
-        "consumes": [
-          "application/json"
         ],
         "produces": [
           "application/json"
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/Habit"
+            }
           },
           "400": {
             "description": "Bad request"
@@ -398,15 +541,66 @@
         "summary": "Create task",
         "description": "",
         "operationId": "addTask",
+        "parameters": [
+          {
+            "name": "task",
+            "in": "formData",
+            "description": "Task image",
+            "required": true,
+            "type": "file"
+          },
+          {
+            "name": "title",
+            "in": "formData",
+            "description": "Task title",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "description",
+            "description": "Task description",
+            "in": "formData",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "dueDate",
+            "in": "formData",
+            "description": "Task dueDate",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "reminder",
+            "in": "formData",
+            "description": "Task reminder",
+            "type": "boolean"
+          },
+          {
+            "name": "daysBefore",
+            "in": "formData",
+            "description": "Number of days to remind before due date",
+            "type": "integer"
+          },
+          {
+            "name": "hourReminder",
+            "in": "formData",
+            "description": "Hour to remind",
+            "type": "string"
+          }
+        ],
         "consumes": [
-          "application/json"
+          "multipart/form-data"
         ],
         "produces": [
           "application/json"
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/Task"
+            }
           },
           "400": {
             "description": "Incomplete data"
@@ -428,7 +622,13 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Task"
+              }
+            }
           },
           "401": {
             "description": "Unauthorized"
@@ -451,17 +651,66 @@
             "description": "Task ID",
             "required": true,
             "type": "string"
+          },
+          {
+            "name": "task",
+            "in": "formData",
+            "description": "Task image",
+            "required": true,
+            "type": "file"
+          },
+          {
+            "name": "title",
+            "in": "formData",
+            "description": "Task title",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "description",
+            "description": "Task description",
+            "in": "formData",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "dueDate",
+            "in": "formData",
+            "description": "Task dueDate",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "reminder",
+            "in": "formData",
+            "description": "Task reminder",
+            "type": "boolean"
+          },
+          {
+            "name": "daysBefore",
+            "in": "formData",
+            "description": "Number of days to remind before due date",
+            "type": "integer"
+          },
+          {
+            "name": "hourReminder",
+            "in": "formData",
+            "description": "Hour to remind",
+            "type": "string"
           }
         ],
         "consumes": [
-          "application/json"
+          "multipart/form-data"
         ],
         "produces": [
           "application/json"
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/Task"
+            }
           },
           "400": {
             "description": "Incomplete data"
@@ -523,7 +772,10 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/Task"
+            }
           },
           "401": {
             "description": "Unauthorized"
@@ -551,15 +803,15 @@
             "type": "string"
           }
         ],
-        "consumes": [
-          "application/json"
-        ],
         "produces": [
           "application/json"
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/Task"
+            }
           },
           "400": {
             "description": "Incomplete data"
@@ -573,7 +825,7 @@
         }
       }
     },
-    "/reports/users": {
+    "/reports/users/{userId}": {
       "get": {
         "tags": [
           "report"
@@ -581,6 +833,15 @@
         "summary": "Get user reports",
         "description": "",
         "operationId": "userReports",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "description": "User ID",
+            "required": true,
+            "type": "string"
+          }
+        ],
         "produces": [
           "application/json"
         ],
@@ -643,7 +904,12 @@
       "authorizationUrl": "http://petstore.swagger.io/oauth/dialog",
       "flow": "implicit",
       "scopes": {
-        "write:account": "Modify accounts"
+        "write:account": "Modify accounts",
+        "read:account": "Read accounts",
+        "write:habit": "Modify habits",
+        "read:habit": "Read habits",
+        "write:task": "Modify tasks",
+        "read:task": "Read tasks"
       }
     },
     "api_key": {
@@ -653,178 +919,114 @@
     }
   },
   "definitions": {
-    "Order": {
+    "Account": {
       "type": "object",
+      "required": [
+        "email",
+        "name",
+        "password"
+      ],
       "properties": {
-        "id": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "petId": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "quantity": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "shipDate": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "status": {
-          "type": "string",
-          "description": "Order Status",
-          "enum": [
-            "placed",
-            "approved",
-            "delivered"
-          ]
-        },
-        "complete": {
-          "type": "boolean",
-          "default": false
-        }
-      },
-      "xml": {
-        "name": "Order"
-      }
-    },
-    "Category": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "integer",
-          "format": "int64"
+        "email": {
+          "type": "string"
         },
         "name": {
           "type": "string"
+        },
+        "password": {
+          "type": "string"
         }
-      },
-      "xml": {
-        "name": "Category"
       }
     },
-    "User": {
+    "LoggedAccount": {
       "type": "object",
       "properties": {
+        "token": {
+          "type": "string"
+        },
         "id": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "username": {
           "type": "string"
-        },
-        "firstName": {
-          "type": "string"
-        },
-        "lastName": {
-          "type": "string"
-        },
+        }
+      }
+    },
+    "Credentials": {
+      "type": "object",
+      "required": [
+        "email",
+        "password"
+      ],
+      "properties": {
         "email": {
           "type": "string"
         },
         "password": {
           "type": "string"
-        },
-        "phone": {
-          "type": "string"
-        },
-        "userStatus": {
-          "type": "integer",
-          "format": "int32",
-          "description": "User Status"
         }
-      },
-      "xml": {
-        "name": "User"
       }
     },
-    "Tag": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "name": {
-          "type": "string"
-        }
-      },
-      "xml": {
-        "name": "Tag"
-      }
-    },
-    "Pet": {
+    "Habit": {
       "type": "object",
       "required": [
-        "name",
-        "photoUrls"
+        "title",
+        "type",
+        "difficulty",
+        "imageUrl"
       ],
       "properties": {
-        "id": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "category": {
-          "$ref": "#/definitions/Category"
-        },
-        "name": {
-          "type": "string",
-          "example": "doggie"
-        },
-        "photoUrls": {
-          "type": "array",
-          "xml": {
-            "name": "photoUrl",
-            "wrapped": true
-          },
-          "items": {
-            "type": "string"
-          }
-        },
-        "tags": {
-          "type": "array",
-          "xml": {
-            "name": "tag",
-            "wrapped": true
-          },
-          "items": {
-            "$ref": "#/definitions/Tag"
-          }
-        },
-        "status": {
-          "type": "string",
-          "description": "pet status in the store",
-          "enum": [
-            "available",
-            "pending",
-            "sold"
-          ]
-        }
-      },
-      "xml": {
-        "name": "Pet"
-      }
-    },
-    "ApiResponse": {
-      "type": "object",
-      "properties": {
-        "code": {
-          "type": "integer",
-          "format": "int32"
+        "title": {
+          "type": "string"
         },
         "type": {
+          "type": "integer"
+        },
+        "difficulty": {
+          "type": "integer"
+        },
+        "imageUrl": {
           "type": "string"
         },
-        "message": {
+        "score": {
+          "type": "number",
+          "default": 0
+        }
+      }
+    },
+    "Task": {
+      "type": "object",
+      "required": [
+        "title",
+        "description",
+        "dueDate",
+        "imageUrl"
+      ],
+      "properties": {
+        "title": {
           "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "dueDate": {
+          "type": "string"
+        },
+        "reminder": {
+          "type": "boolean",
+          "default": false
+        },
+        "daysBefore": {
+          "type": "integer"
+        },
+        "hourReminder": {
+          "type": "string"
+        },
+        "imageUrl": {
+          "type": "string"
+        },
+        "completed": {
+          "type": "boolean",
+          "default": false
         }
       }
     }
-  },
-  "externalDocs": {
-    "description": "Find out more about Swagger",
-    "url": "http://swagger.io"
   }
 }
