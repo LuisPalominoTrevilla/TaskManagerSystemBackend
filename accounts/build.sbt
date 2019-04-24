@@ -20,3 +20,5 @@ libraryDependencies ++= Seq(
 
 enablePlugins(SbtTwirl)
 enablePlugins(ScalatraPlugin)
+
+containerPort in Jetty := 4000
