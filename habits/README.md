@@ -11,6 +11,6 @@ Habits microservice that belongs to the task manager system
 
 - Use the following command
 
-`$ go run src/main.go`
+    `$ go run src/main.go`
 
 - Browse `localhost:4001`
