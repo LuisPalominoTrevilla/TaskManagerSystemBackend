@@ -1,0 +1,17 @@
+{
+  "name": "tasks",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "FORCE_COLOR=1 nodemon ./bin/www"
+  },
+  "dependencies": {
+    "async": "^2.6.1",
+    "cookie-parser": "~1.4.3",
+    "debug": "~2.6.9",
+    "express": "~4.16.0",
+    "helmet": "3.15.0",
+    "morgan": "~1.9.0",
+    "nodemon": "1.18.9"
+  }
+}
