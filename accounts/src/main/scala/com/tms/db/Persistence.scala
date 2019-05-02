@@ -13,8 +13,24 @@ object Persistence {
     val BUCKET_NAME = "tms-itesm"
     val FILE_PATH = "/"
     val DATABASE_FILE = "accounts.txt"
-    val AWS_ACCESS_KEY = "AKIAIFAZARV4736VE7WQ"
-    val AWS_SECRET_KEY = "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"
+    val AWS_ACCESS_KEY = getAccessKey
+    val AWS_SECRET_KEY = getSecretKey
+
+    def getAccessKey(): String = {
+        val x: Option[String] = sys.env.get("AWS_ACCESS_KEY")
+        x match {
+            case Some(value) => value
+            case None => ""
+        }
+    }
+
+    def getSecretKey(): String = {
+        val x: Option[String] = sys.env.get("AWS_SECRET_KEY")
+        x match {
+            case Some(value) => value
+            case None => ""
+        }
+    }
 
     def readFile(reader: BufferedReader): List[String] = {
         val line = reader.readLine
