@@ -16,13 +16,12 @@ class AccountsController extends ScalatraServlet with JacksonJsonSupport {
   }
 
   get("/") {
-    val account = Account("luispalominot@hotmail.com", "Luis Palomino", "luismfao2")
-    account
+    "API is alive"
   }
 
   get("/accounts") {
     try {
-      Persistence.getAll()
+      Persistence.getAll
     } catch {
       case e: Throwable => {
           status = 500
@@ -31,4 +30,15 @@ class AccountsController extends ScalatraServlet with JacksonJsonSupport {
     }
   }
 
+  post("/accounts") {
+    try {
+      val newAccount: Account = parsedBody.extract[Account]
+      Persistence.insertOne(newAccount)
+    } catch {
+      case e: Throwable => {
+        status = 400
+        Error(400, e.getMessage)
+      }
+    }
+  }
 }

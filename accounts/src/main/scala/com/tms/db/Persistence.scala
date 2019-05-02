@@ -1,6 +1,7 @@
 package com.tms.db
 
 import com.tms.models.Account
+import java.nio.file.Paths
 
 object Persistence {
 
@@ -20,5 +21,11 @@ object Persistence {
         }
         val rawAccounts: List[String] = AWSBucket.getFile()
         processAccounts(rawAccounts, Nil)
+    }
+
+    def insertOne(account: Account): Unit = {
+        val root = System.getProperty("user.dir")
+        val filePath = Paths.get(root, "src", "main", "resources", "accounts.txt").toString
+        AWSBucket.saveFile(filePath)
     }
 }

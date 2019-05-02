@@ -6,6 +6,9 @@ import com.amazonaws.AmazonClientException
 import com.amazonaws.AmazonServiceException
 import java.io.BufferedReader
 import java.io.InputStreamReader
+import java.io.FileOutputStream
+import org.apache.commons.io.IOUtils
+import scala.io.{Source, BufferedSource}
 
 object AWSBucket {
 
@@ -46,6 +49,19 @@ object AWSBucket {
             val reader = new BufferedReader(new InputStreamReader(obj.getObjectContent()))
             val lines: List[String] = readFile(reader)
             lines
+        } catch {
+            case ase: AmazonServiceException => throw new Exception("An error occurred")
+            case ace: AmazonClientException => throw new Exception("An error occurred")
+        }
+    }
+
+    def saveFile(path: String): Unit = {
+        try {
+            val obj = amazonS3Client.getObject(BUCKET_NAME, DATABASE_FILE)
+
+            val bytes = IOUtils.toByteArray(obj.getObjectContent())
+            val file = new FileOutputStream(path)
+            file.write(bytes)
         } catch {
             case ase: AmazonServiceException => throw new Exception("An error occurred")
             case ace: AmazonClientException => throw new Exception("An error occurred")
