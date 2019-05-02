@@ -11,7 +11,7 @@ object AWSBucket {
 
     val BUCKET_NAME = "tms-itesm"
     val FILE_PATH = "/"
-    val DATABASE_FILE = "accountse.txt"
+    val DATABASE_FILE = "accounts.txt"
     val AWS_ACCESS_KEY = getAccessKey
     val AWS_SECRET_KEY = getSecretKey
 

@@ -24,7 +24,10 @@ class AccountsController extends ScalatraServlet with JacksonJsonSupport {
     try {
       Persistence.getAll()
     } catch {
-      case e: Throwable => Error(500, e.getMessage)
+      case e: Throwable => {
+          status = 500
+          Error(500, e.getMessage)
+        }
     }
   }
 
