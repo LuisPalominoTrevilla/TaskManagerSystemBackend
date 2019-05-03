@@ -8,6 +8,7 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.io.FileOutputStream
 import org.apache.commons.io.IOUtils
+import java.io.File
 import scala.io.{Source, BufferedSource}
 
 object AWSBucket {
@@ -55,9 +56,11 @@ object AWSBucket {
         }
     }
 
+    def uploadFile(fileToUpload: File): Unit = this.amazonS3Client.putObject(BUCKET_NAME, DATABASE_FILE, fileToUpload)
+
     def saveFile(path: String): Unit = {
         try {
-            val obj = amazonS3Client.getObject(BUCKET_NAME, DATABASE_FILE)
+            val obj = this.amazonS3Client.getObject(BUCKET_NAME, DATABASE_FILE)
 
             val bytes = IOUtils.toByteArray(obj.getObjectContent())
             val file = new FileOutputStream(path)

@@ -23,9 +23,15 @@ object Persistence {
         processAccounts(rawAccounts, Nil)
     }
 
-    def insertOne(account: Account): Unit = {
+    def insertOne(account: Account): Account = {
         val root = System.getProperty("user.dir")
         val filePath = Paths.get(root, "src", "main", "resources", "accounts.txt").toString
         AWSBucket.saveFile(filePath)
+        val fileContent: List[String] = FileModifier.getFileContents(filePath)
+        val newLine: String = account match { case Account(email, name, password) => "%s,%s,%s".format(email, name, password)}
+        val file = FileModifier.insertIntoFile(filePath, newLine :: fileContent)
+        AWSBucket.uploadFile(file)
+        FileModifier.deleteFile(file)
+        account
     }
 }
