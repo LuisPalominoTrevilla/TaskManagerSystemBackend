@@ -58,13 +58,9 @@ object AWSBucket {
 
     def uploadFile(fileToUpload: File): Unit = this.amazonS3Client.putObject(BUCKET_NAME, DATABASE_FILE, fileToUpload)
 
-    def saveFile(path: String): Unit = {
+    def saveFile(path: String): File = {
         try {
-            val obj = this.amazonS3Client.getObject(BUCKET_NAME, DATABASE_FILE)
-
-            val bytes = IOUtils.toByteArray(obj.getObjectContent())
-            val file = new FileOutputStream(path)
-            file.write(bytes)
+            FileModifier.insertIntoFile(path, this.getFile())
         } catch {
             case ase: AmazonServiceException => throw new Exception("An error occurred")
             case ace: AmazonClientException => throw new Exception("An error occurred")
