@@ -5,7 +5,7 @@ import org.json4s.{DefaultFormats, Formats}
 import org.scalatra.json._
 
 import com.tms.db.Persistence
-import com.tms.models.{Account, Error}
+import com.tms.models._
 
 class AccountsController extends ScalatraServlet with JacksonJsonSupport {
 
@@ -25,7 +25,7 @@ class AccountsController extends ScalatraServlet with JacksonJsonSupport {
     } catch {
       case e: Throwable => {
           status = 500
-          Error(500, e.getMessage)
+          ResponseError(500, e.getMessage)
         }
     }
   }
@@ -37,7 +37,7 @@ class AccountsController extends ScalatraServlet with JacksonJsonSupport {
     } catch {
       case e: Throwable => {
         status = 400
-        Error(400, e.getMessage)
+        ResponseError(400, e.getMessage)
       }
     }
   }
@@ -51,7 +51,7 @@ class AccountsController extends ScalatraServlet with JacksonJsonSupport {
       case e: Throwable => {
         contentType = formats("json")
         status = 400
-        Error(400, e.getMessage)
+        ResponseError(400, e.getMessage)
       }
     }
   }
@@ -65,7 +65,21 @@ class AccountsController extends ScalatraServlet with JacksonJsonSupport {
       case e: Throwable => {
         contentType = formats("json")
         status = 400
-        Error(400, e.getMessage)
+        ResponseError(400, e.getMessage)
+      }
+    }
+  }
+
+  post("/accounts/login") {
+    try {
+      val credentials: Credentials = parsedBody.extract[Credentials]
+      Persistence.getAll find {
+        case Account(email, _, password) => email == credentials.email && password == credentials.password
+      } match { case Some(account) => account; case None => throw new Error("Credentials not valid") }
+    } catch {
+      case e: Throwable => {
+        status = 401
+        ResponseError(401, e.getMessage)
       }
     }
   }

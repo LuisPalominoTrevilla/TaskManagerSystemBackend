@@ -1,3 +1,3 @@
 package com.tms.models
 
-case class Error(status: Int, message: String)
+case class ResponseError(status: Int, message: String)
