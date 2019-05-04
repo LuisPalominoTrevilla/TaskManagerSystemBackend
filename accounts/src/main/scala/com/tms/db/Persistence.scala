@@ -5,6 +5,8 @@ import java.nio.file.Paths
 
 object Persistence {
 
+    val filePath = Paths.get(System.getProperty("user.dir"), "src", "main", "resources", "accounts.txt").toString
+
     private def validateDuplicated(records: List[String], newRecord: String): Boolean = {
         records match {
             case record :: xs => if (record.split(",")(0) == newRecord) false else validateDuplicated(xs, newRecord)
@@ -31,13 +33,11 @@ object Persistence {
     }
 
     def insertOne(account: Account): Account = {
-        val root = System.getProperty("user.dir")
-        val filePath = Paths.get(root, "src", "main", "resources", "accounts.txt").toString
-        AWSBucket.saveFile(filePath)
-        val fileContent: List[String] = FileModifier.getFileContents(filePath)
+        AWSBucket.saveFile(this.filePath)
+        val fileContent: List[String] = FileModifier.getFileContents(this.filePath)
         if (validateDuplicated(fileContent, account.email)) {
             val newLine: String = account match { case Account(email, name, password) => "%s,%s,%s".format(email, name, password)}
-            val file = FileModifier.insertIntoFile(filePath, newLine :: fileContent)
+            val file = FileModifier.insertIntoFile(this.filePath, newLine :: fileContent)
             AWSBucket.uploadFile(file)
             FileModifier.deleteFile(file)
         } else {
@@ -47,12 +47,27 @@ object Persistence {
     }
 
     def deleteAll(): Unit = {
-        val root = System.getProperty("user.dir")
-        val filePath = Paths.get(root, "src", "main", "resources", "accounts.txt").toString
-        AWSBucket.saveFile(filePath)
-        val fileContent: List[String] = FileModifier.getFileContents(filePath)
-        val file = FileModifier.insertIntoFile(filePath, Nil)
+        AWSBucket.saveFile(this.filePath)
+        val fileContent: List[String] = FileModifier.getFileContents(this.filePath)
+        val file = FileModifier.insertIntoFile(this.filePath, Nil)
         AWSBucket.uploadFile(file)
         FileModifier.deleteFile(file)
+    }
+
+    def deleteOne(deleteMail: String): Unit = {
+        AWSBucket.saveFile(this.filePath)
+        val fileContent: List[String] = FileModifier.getFileContents(this.filePath)
+        val origLength = fileContent.length
+        val newContent: List[String] = (for {
+            line <- fileContent
+            if (line.split(",") match { case Array(mail, _, _) => mail != deleteMail; case default => false})
+        } yield line)
+        if (newContent.length < origLength) {
+            val file = FileModifier.insertIntoFile(this.filePath, newContent)
+            AWSBucket.uploadFile(file)
+            FileModifier.deleteFile(file)
+        } else {
+            throw new Error("Nothing to delete")
+        }
     }
 }

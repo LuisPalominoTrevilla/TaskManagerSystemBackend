@@ -49,13 +49,24 @@ class AccountsController extends ScalatraServlet with JacksonJsonSupport {
       "OK"
     } catch {
       case e: Throwable => {
+        contentType = formats("json")
         status = 400
         Error(400, e.getMessage)
       }
     }
   }
 
-  delete("/accounts/:id") {
-    params("id")
+  delete("/accounts/:email") {
+    contentType = "text/plain"
+    try {
+      Persistence.deleteOne(params("email"))
+      "OK"
+    } catch {
+      case e: Throwable => {
+        contentType = formats("json")
+        status = 400
+        Error(400, e.getMessage)
+      }
+    }
   }
 }
