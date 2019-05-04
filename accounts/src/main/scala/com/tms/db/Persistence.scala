@@ -45,4 +45,14 @@ object Persistence {
         }
         account
     }
+
+    def deleteAll(): Unit = {
+        val root = System.getProperty("user.dir")
+        val filePath = Paths.get(root, "src", "main", "resources", "accounts.txt").toString
+        AWSBucket.saveFile(filePath)
+        val fileContent: List[String] = FileModifier.getFileContents(filePath)
+        val file = FileModifier.insertIntoFile(filePath, Nil)
+        AWSBucket.uploadFile(file)
+        FileModifier.deleteFile(file)
+    }
 }

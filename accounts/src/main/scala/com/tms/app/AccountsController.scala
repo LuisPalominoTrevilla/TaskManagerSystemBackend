@@ -41,4 +41,21 @@ class AccountsController extends ScalatraServlet with JacksonJsonSupport {
       }
     }
   }
+
+  delete("/accounts") {
+    contentType = "text/plain"
+    try {
+      Persistence.deleteAll
+      "OK"
+    } catch {
+      case e: Throwable => {
+        status = 400
+        Error(400, e.getMessage)
+      }
+    }
+  }
+
+  delete("/accounts/:id") {
+    params("id")
+  }
 }
