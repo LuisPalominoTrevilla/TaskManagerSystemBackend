@@ -13,9 +13,9 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(helmet());
 
-app.use('/api', endpoints);
-app.get('/', (req, res) => {
-    res.send("Tasks microservice");
+app.get('/healthecheck', (req, res) => {
+    res.status(200).json({ status: 'OK' });
 });
+app.use('/', endpoints);
 
 module.exports = app;
