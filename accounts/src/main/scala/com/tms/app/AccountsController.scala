@@ -30,6 +30,20 @@ class AccountsController extends ScalatraServlet with JacksonJsonSupport {
     }
   }
 
+  get("/accounts/:email") {
+    try {
+      val accounts: List[Account] = Persistence.getAll
+      accounts find {
+        case Account(email, _, _) => email == params("email")
+      } match { case Some(account) => account; case None => throw new Error("Account was not found") }
+    } catch {
+      case e: Throwable => {
+          status = 500
+          ResponseError(500, e.getMessage)
+        }
+    }
+  }
+
   post("/accounts") {
     try {
       val newAccount: Account = parsedBody.extract[Account]
