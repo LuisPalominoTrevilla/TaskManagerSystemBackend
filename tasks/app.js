@@ -2,8 +2,13 @@ const express = require('express');
 const helmet = require('helmet');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
+const db = require('./db/connection');
 
 const endpoints = require('./routes');
+
+db.testConnection()
+    .then(() => console.log('Succesfully connected to database'))
+    .catch(err => console.log(err));
 
 const app = express();
 
