@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 	"time"
 
 	"github.com/mongodb/mongo-go-driver/bson"
@@ -25,7 +26,7 @@ type Database interface {
 func InitDb() *mongo.Database {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	client, err := mongo.Connect(ctx, "mongodb://localhost:27017")
+	client, err := mongo.Connect(ctx, os.Getenv("MONGO_HOST")+":"+os.Getenv("MONGO_PORT"))
 	if err != nil {
 		log.Fatal("There was an error connecting to the database")
 	}
@@ -35,6 +36,5 @@ func InitDb() *mongo.Database {
 		log.Fatal("Couldnt find a server ", err)
 	}
 	fmt.Println("Connected to MongoDB!")
-	db := client.Database("guessit")
-	return db
+	return client.Database(os.Getenv("MONGO_DB"))
 }

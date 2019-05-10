@@ -1,10 +1,9 @@
 package models
 
-type User struct {
-	Name     string `json:"name"`
-	Username string `json:"username"`
-	Email    string `json:"email"`
-	LastName string `json:"lastName"`
-	Password string `json:"password"`
-	Age      int    `json:"age"`
+//Habit is used to create a habit
+type Habit struct {
+	Name       string `json:"name"`
+	Category   string `json:"category"`
+	Difficulty string `json:"difficulty"`
+	UserEmail  string `json:"userEmail"`
 }

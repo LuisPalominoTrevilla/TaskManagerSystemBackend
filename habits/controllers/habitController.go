@@ -14,7 +14,7 @@ type HabitsController struct {
 
 // Get serves as a GET request
 func (controller *HabitsController) Get(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Habbits controller")
+	fmt.Fprintf(w, "Habits controller")
 }
 
 func (controller *HabitsController) initializeController(r *mux.Router) {
