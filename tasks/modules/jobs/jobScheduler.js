@@ -3,6 +3,6 @@ const taskReminder = require('./taskReminderJob');
 
 module.exports = {
     startJobs() {
-        new CronJob('*/6 * * * *', taskReminder, null, true, 'America/Mexico_City');
+        new CronJob('*/4 * * * *', taskReminder, null, true, 'America/Mexico_City');
     }
 }
