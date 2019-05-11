@@ -89,6 +89,29 @@ router.post('/', (req, res) => {
     });
 });
 
+router.post('/:taskId/complete', (req, res) => {
+    const taskId = req.params.taskId;
+    let existentTask;
+    taskDB.findById(taskId)
+        .then(result => {
+            existentTask = result;
+            if (result.completed === 1) {
+                throw { error: 409, message: 'Task has already been completed' };
+            }
+            return taskDB.update({ completed: 1}, { taskId });
+        })
+        .then(() => {
+            existentTask.completed = true;
+            existentTask.reminder = existentTask.reminder !== 0;
+            existentTask.id = existentTask.taskId;
+            delete existentTask.taskId;
+            res.status(200).send(existentTask);
+        })
+        .catch(err => {
+            res.status(err.error).send(err);
+        });
+});
+
 router.delete('/:taskId', (req, res) => {
     const taskId = req.params.taskId;
     taskDB.findById(taskId)

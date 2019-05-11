@@ -8,7 +8,7 @@ const task = {
         let sql = `SELECT * FROM tasks WHERE taskId=${mysql.escape(taskId)}`;
         return new Promise((resolve, reject) => {
             db.query(sql, (err, result) => {
-                if (err) return reject(err);
+                if (err) return reject({ error: 500, message: err.message });
                 if (result.length === 0) reject({ error: 404, message: 'There is no task associated with the taskId provided' });
                 else resolve(result[0]);
             })
@@ -23,6 +23,24 @@ const task = {
         return new Promise((resolve, reject) => {
             db.query(sql, [values], (err, result) => {
                 if (err) return reject(err);
+                resolve(result);
+            });
+        });
+    },
+
+    update(fields, where) {
+        let sql = 'UPDATE tasks SET ';
+        for (const field in fields) {
+            sql += `${field} = ${mysql.escape(fields[field])}, `;
+        }
+        sql = `${sql.slice(0, -2)} WHERE `;
+        for (const field in where) {
+            sql += `${field} = ${mysql.escape(where[field])}, `;
+        }
+        sql = sql.slice(0, -2);
+        return new Promise((resolve, reject) => {
+            db.query(sql, (err, result) => {
+                if (err) return reject({ error: 500, message: err.message });
                 resolve(result);
             });
         });
