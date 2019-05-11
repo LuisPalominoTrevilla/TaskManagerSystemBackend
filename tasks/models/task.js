@@ -1,5 +1,7 @@
 const { connection: db } = require('../db/connection');
 const mysql = require('mysql');
+const moment = require('moment-timezone');
+moment.tz.setDefault('America/Mexico_City');
 
 const task = {
     findById(taskId) {
@@ -27,7 +29,18 @@ const task = {
     },
 
     deleteOne(taskId) {
-        let sql = `DELETE FROM tasks WHERE taskId=${mysql.escape(taskId)}`;
+        const sql = `DELETE FROM tasks WHERE taskId=${mysql.escape(taskId)}`;
+        return new Promise((resolve, reject) => {
+            db.query(sql, (err, result) => {
+                if (err) return reject(err);
+                resolve(result);
+            })
+        });
+    },
+
+    getReminderTasks(minutesAfter = 0) {
+        const datetimeBefore = moment().add(minutesAfter, 'minute').format('YYYY-MM-DD HH:mm:ss');
+        const sql = `SELECT * FROM tasks WHERE reminderDate < ${mysql.escape(datetimeBefore)} AND completed = 0 ORDER BY reminderDate ASC`;
         return new Promise((resolve, reject) => {
             db.query(sql, (err, result) => {
                 if (err) return reject(err);

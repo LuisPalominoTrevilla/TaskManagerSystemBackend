@@ -22,7 +22,7 @@ router.post('/', (req, res) => {
 
     const completeParams = title !== undefined && description !== undefined &&
         dueDate !== undefined && userId !== undefined && !strings.isEmpty(description) &&
-        !strings.isEmpty(title) && !strings.isEmpty(userId);
+        !strings.isEmpty(title) && !strings.isEmpty(userId) && req.files.image !== undefined;
     const validDates = moment(dueDate).format() !== 'Invalid date' &&
         (reminderDate === undefined || moment(reminderDate).format() != 'Invalid date');
 

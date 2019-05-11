@@ -1,4 +1,12 @@
+const taskDb = require('../../models/task');
+
 
 module.exports = function() {
-    console.log('I\'m a job')
+    taskDb.getReminderTasks(3)
+        .then(result => {
+            console.log(result);
+        })
+        .catch(err => {
+            console.log(err);
+        });
 }
