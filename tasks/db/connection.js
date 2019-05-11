@@ -21,5 +21,8 @@ module.exports = {
                 }
             });
         });
+    },
+    setTimeZone(tz) {
+        connectionPool.query(`SET time_zone = '${tz}';`);
     }
 };

@@ -54,7 +54,6 @@ router.post('/', (req, res) => {
         }
 
         const imageName = path.basename(req.files.image.path);
-
         S3Client.uploadFile(imageName, file, type, {'ContentType': mime})
             .then(url => {
                 newTask.imageUrl = url;

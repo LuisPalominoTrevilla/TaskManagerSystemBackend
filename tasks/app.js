@@ -5,14 +5,18 @@ const helmet = require('helmet');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const formData = require('express-form-data');
+const jobScheduler = require('./modules/jobs/jobScheduler');
 const os = require('os');
 const db = require('./db/connection');
 
 const endpoints = require('./routes');
 
+jobScheduler.startJobs();
+
 db.testConnection()
     .then(() => console.log('Succesfully connected to database'))
     .catch(err => console.log(err));
+db.setTimeZone('America/Mexico_City');
 
 const app = express();
 

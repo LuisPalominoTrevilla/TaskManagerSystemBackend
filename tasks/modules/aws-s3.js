@@ -23,13 +23,27 @@ module.exports = {
             S3Client.exists(filename, exists => {
                 const uniqueNumber = new Date().valueOf();
                 const uniqueName = exists ? `${uniqueNumber+""}.${extension}` : filename;
-                S3Client.writeFile(uniqueName, file, options)
+                const params = {
+                    Bucket: bucket,
+                    Key: uniqueName,
+                    ContentType: options.ContentType,
+                    Body: file
+                };
+                s3.upload(params, (err, data) => {
+                    if (err) reject(err);
+                    else {
+                        const imageUrl = `${process.env.AWS_OBJECT_PREFIX}/${bucket}/${uniqueName}`;
+                        resolve(imageUrl);
+                    }
+                });
+                /* S3Client.writeFile(uniqueName, file, options)
                     .then(() => {
+                        console.log('Time it took to upload', new Date().getTime() - start2);
                         const imageUrl = `${process.env.AWS_OBJECT_PREFIX}/${bucket}/${uniqueName}`;
                         resolve(imageUrl);
                     }, (err) => {
                         reject(err);
-                    });
+                    }); */
             });
         });
     },
