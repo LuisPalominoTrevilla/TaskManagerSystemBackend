@@ -1,5 +1,6 @@
 const express = require('express');
 const moment = require('moment-timezone');
+const strings = require('../../utils/strings');
 const router = express.Router();
 
 moment.tz.setDefault('America/Mexico_City');
@@ -13,8 +14,12 @@ router.get('/', (req, res, next) => {
 router.post('/', (req, res, next) => {
     const newTask = {};
     const { title, description, dueDate, reminderDate, userId } = req.body;
+
+    console.log(req.files.image);
+
     const completeParams = title !== undefined && description !== undefined &&
-        dueDate !== undefined && userId !== undefined;
+        dueDate !== undefined && userId !== undefined && !strings.isEmpty(description) &&
+        !strings.isEmpty(title) && !strings.isEmpty(userId);
     const validDates = moment(dueDate).format() !== 'Invalid date' && moment(reminderDate).format() != 'Invalid date';
 
     if (!completeParams) {

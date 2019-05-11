@@ -2,10 +2,10 @@ const mysql = require('mysql');
 
 const connectionPool = mysql.createPool({
     connectionLimit : 10,
-    host     : 'generalpurpose.crcsqwhwrqwu.us-east-2.rds.amazonaws.com',
-    user     : 'admin',
-    password : 'arquitecturasoftware',
-    database : 'arquitectura',
+    host     : process.env.DB_HOST,
+    user     : process.env.DB_USER,
+    password : process.env.DB_PASSWORD,
+    database : process.env.DB_NAME,
     timezone : 'local'
 });
 
