@@ -1,6 +1,10 @@
 const express = require('express');
 const moment = require('moment-timezone');
-const strings = require('../../utils/strings');
+const strings = require('../../modules/strings');
+const path = require('path');
+const fs = require('fs');
+const fileType = require('file-type');
+const S3Client = require('../../modules/aws-s3');
 const router = express.Router();
 
 moment.tz.setDefault('America/Mexico_City');
@@ -14,8 +18,6 @@ router.get('/', (req, res, next) => {
 router.post('/', (req, res, next) => {
     const newTask = {};
     const { title, description, dueDate, reminderDate, userId } = req.body;
-
-    console.log(req.files.image);
 
     const completeParams = title !== undefined && description !== undefined &&
         dueDate !== undefined && userId !== undefined && !strings.isEmpty(description) &&
@@ -40,8 +42,21 @@ router.post('/', (req, res, next) => {
     }
     newTask.userId = userId;
 
-    console.log(JSON.stringify(newTask, null, 2));
-    res.send('hola');
+    fs.readFile(req.files.image.path, (err, file) => {
+        if (err) return res.status(500).json({ error: 500, message: 'Image could not be read' });
+
+        const { ext: type , mime } = fileType(file);
+
+        if (type !== 'jpg' && type !== 'png' && type !== 'gif') {
+            return res.status(400).json({ error: 400, message: 'File provided is not a valid image, valid types are jpeg, png or gif' });
+        }
+
+        const imageName = path.basename(req.files.image.path);
+
+        S3Client.uploadFile(imageName, file, type, {'ContentType': mime})
+            .then((url) => res.status(200).send(url))
+            .catch(() => res.status(500).send({ error: 500, message: 'An error occurred while uploading the image' }));
+    });
 });
 
 module.exports = router;
