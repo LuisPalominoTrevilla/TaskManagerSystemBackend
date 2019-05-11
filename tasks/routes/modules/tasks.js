@@ -16,6 +16,17 @@ router.get('/', (req, res) => {
     });
 });
 
+router.get('/:taskId', (req, res) => {
+    const taskId = req.params.taskId;
+    taskDB.findById(taskId)
+        .then(result => {
+            res.status(200).send(result);
+        })
+        .catch(err => {
+            return res.status(404).send(err);
+        });
+});
+
 router.post('/', (req, res) => {
     const newTask = {};
     const { title, description, dueDate, reminderDate, userId } = req.body;
