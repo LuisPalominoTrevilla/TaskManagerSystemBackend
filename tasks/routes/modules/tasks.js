@@ -10,13 +10,13 @@ const taskDB = require('../../models/task');
 
 moment.tz.setDefault('America/Mexico_City');
 
-router.get('/', (req, res, next) => {
+router.get('/', (req, res) => {
     res.json({
         message: 'Hello from tasks'
     });
 });
 
-router.post('/', (req, res, next) => {
+router.post('/', (req, res) => {
     const newTask = {};
     const { title, description, dueDate, reminderDate, userId } = req.body;
 
@@ -60,7 +60,8 @@ router.post('/', (req, res, next) => {
                 newTask.imageUrl = url;
                 return taskDB.insertOne(newTask);
             })
-            .then(() => {
+            .then((queryResults) => {
+                newTask.id = queryResults.insertId;
                 res.status(200).send(newTask);
             })
             .catch(err => {
@@ -68,6 +69,26 @@ router.post('/', (req, res, next) => {
                 res.status(500).send({ error: 500, message: 'An error occurred while trying to create the task' });
             });
     });
+});
+
+router.delete('/:taskId', (req, res) => {
+    const taskId = req.params.taskId;
+    taskDB.findById(taskId)
+        .then(result => {
+            const imageFile = result.imageUrl.split('/').slice(-1)[0];
+            S3Client.deleteFile(imageFile);
+            taskDB.deleteOne(taskId)
+                .then(() => {
+                    res.status(200).send('OK');
+                })
+                .catch(err => {
+                    console.log(err);
+                    res.status(500).send({ error: 500, message: 'An error occurred while trying to delete the task' });
+                });
+        })
+        .catch(err => {
+            return res.status(404).send(err);
+        });
 });
 
 module.exports = router;

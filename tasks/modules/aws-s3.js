@@ -1,4 +1,11 @@
 const S3FS = require('s3fs');
+const officialS3 = require('aws-sdk');
+
+const s3 = new officialS3.S3({
+    region: 'us-west-1',
+    accessKeyId: process.env.AWS_ACCESS_KEY,
+    secretAccessKey: process.env.AWS_SECRET_KEY
+})
 
 
 const bucket = `${process.env.AWS_BUCKET}/tasks`;
@@ -23,6 +30,19 @@ module.exports = {
                     }, (err) => {
                         reject(err);
                     });
+            });
+        });
+    },
+
+    deleteFile(filename) {
+        const params = {
+            Bucket: bucket,
+            Key: filename
+        };
+        return new Promise((resolve, reject) => {
+            s3.deleteObject(params, (err, res) => {
+                if (err) reject(err);
+                else resolve();
             });
         });
     }
