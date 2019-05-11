@@ -20,7 +20,14 @@ router.get('/:taskId', (req, res) => {
     const taskId = req.params.taskId;
     taskDB.findById(taskId)
         .then(result => {
-            res.status(200).send(result);
+            const taskFound = {
+                ...result,
+                id: result.taskId,
+                reminder: result.reminder !== 0,
+                completed: result.completed !== 0
+            };
+            delete taskFound.taskId;
+            res.status(200).send(taskFound);
         })
         .catch(err => {
             return res.status(404).send(err);
@@ -68,6 +75,7 @@ router.post('/', (req, res) => {
         S3Client.uploadFile(imageName, file, type, {'ContentType': mime})
             .then(url => {
                 newTask.imageUrl = url;
+                newTask.completed = false;
                 return taskDB.insertOne(newTask);
             })
             .then((queryResults) => {

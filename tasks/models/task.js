@@ -41,7 +41,7 @@ const task = {
     getReminderTasks(minutesAfter = 0) {
         const datetimeBefore = moment().add(minutesAfter, 'minute').format('YYYY-MM-DD HH:mm:ss');
         const datetimeAfter = moment().subtract(minutesAfter, 'minute').format('YYYY-MM-DD HH:mm:ss');
-        const sql = `SELECT * FROM tasks WHERE reminderDate < ${mysql.escape(datetimeBefore)} AND
+        const sql = `SELECT * FROM tasks WHERE reminder = 1 AND reminderDate < ${mysql.escape(datetimeBefore)} AND
             reminderDate >= ${mysql.escape(datetimeAfter)} AND
             completed = 0 ORDER BY reminderDate ASC`;
         return new Promise((resolve, reject) => {
