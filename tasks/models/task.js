@@ -1,4 +1,5 @@
 const { connection: db } = require('../db/connection');
+const mysql = require('mysql');
 
 const task = {
     insertOne(newTask) {
@@ -11,6 +12,16 @@ const task = {
                 if (err) return reject(err);
                 resolve(result);
             });
+        });
+    },
+
+    deleteOne(taskId) {
+        let sql = `DELETE FROM tasks WHERE taskId=${mysql.escape(taskId)}`;
+        return new Promise((resolve, reject) => {
+            db.query(sql, (err, result) => {
+                if (err) return reject(err);
+                resolve(result);
+            })
         });
     }
 }

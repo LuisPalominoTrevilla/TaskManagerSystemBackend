@@ -10,13 +10,13 @@ const taskDB = require('../../models/task');
 
 moment.tz.setDefault('America/Mexico_City');
 
-router.get('/', (req, res, next) => {
+router.get('/', (req, res) => {
     res.json({
         message: 'Hello from tasks'
     });
 });
 
-router.post('/', (req, res, next) => {
+router.post('/', (req, res) => {
     const newTask = {};
     const { title, description, dueDate, reminderDate, userId } = req.body;
 
@@ -68,6 +68,18 @@ router.post('/', (req, res, next) => {
                 res.status(500).send({ error: 500, message: 'An error occurred while trying to create the task' });
             });
     });
+});
+
+router.delete('/:taskId', (req, res) => {
+    const taskId = req.params.taskId;
+    taskDB.deleteOne(taskId)
+        .then(() => {
+            res.status(200).send('OK');
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(500).send({ error: 500, message: 'An error occurred while trying to delete the task' });
+        });
 });
 
 module.exports = router;
