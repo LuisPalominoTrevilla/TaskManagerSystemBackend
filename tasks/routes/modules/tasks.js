@@ -60,7 +60,8 @@ router.post('/', (req, res) => {
                 newTask.imageUrl = url;
                 return taskDB.insertOne(newTask);
             })
-            .then(() => {
+            .then((queryResults) => {
+                newTask.id = queryResults.insertId;
                 res.status(200).send(newTask);
             })
             .catch(err => {
@@ -72,13 +73,21 @@ router.post('/', (req, res) => {
 
 router.delete('/:taskId', (req, res) => {
     const taskId = req.params.taskId;
-    taskDB.deleteOne(taskId)
-        .then(() => {
-            res.status(200).send('OK');
+    taskDB.findById(taskId)
+        .then(result => {
+            const imageFile = result.imageUrl.split('/').slice(-1)[0];
+            S3Client.deleteFile(imageFile);
+            taskDB.deleteOne(taskId)
+                .then(() => {
+                    res.status(200).send('OK');
+                })
+                .catch(err => {
+                    console.log(err);
+                    res.status(500).send({ error: 500, message: 'An error occurred while trying to delete the task' });
+                });
         })
         .catch(err => {
-            console.log(err);
-            res.status(500).send({ error: 500, message: 'An error occurred while trying to delete the task' });
+            return res.status(404).send(err);
         });
 });
 
