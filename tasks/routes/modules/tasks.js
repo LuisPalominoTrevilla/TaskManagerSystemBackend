@@ -6,6 +6,7 @@ const fs = require('fs');
 const fileType = require('file-type');
 const S3Client = require('../../modules/aws-s3');
 const router = express.Router();
+const taskDB = require('../../models/task');
 
 moment.tz.setDefault('America/Mexico_City');
 
@@ -22,7 +23,8 @@ router.post('/', (req, res, next) => {
     const completeParams = title !== undefined && description !== undefined &&
         dueDate !== undefined && userId !== undefined && !strings.isEmpty(description) &&
         !strings.isEmpty(title) && !strings.isEmpty(userId);
-    const validDates = moment(dueDate).format() !== 'Invalid date' && moment(reminderDate).format() != 'Invalid date';
+    const validDates = moment(dueDate).format() !== 'Invalid date' &&
+        (reminderDate === undefined || moment(reminderDate).format() != 'Invalid date');
 
     if (!completeParams) {
         return res.status(400).json({ error: 400, message: 'Required parameters missing' });
@@ -33,10 +35,10 @@ router.post('/', (req, res, next) => {
 
     newTask.title = title;
     newTask.description = description;
-    newTask.dueDate = moment(dueDate).toDate();
+    newTask.dueDate = moment(dueDate).format('YYYY-MM-DD HH:mm:ss');
     if (reminderDate !== undefined) {
         newTask.reminder = true;
-        newTask.reminderDate = moment(reminderDate).toDate();
+        newTask.reminderDate = moment(reminderDate).format('YYYY-MM-DD HH:mm:ss');
     } else {
         newTask.reminder = false;
     }
@@ -54,8 +56,17 @@ router.post('/', (req, res, next) => {
         const imageName = path.basename(req.files.image.path);
 
         S3Client.uploadFile(imageName, file, type, {'ContentType': mime})
-            .then((url) => res.status(200).send(url))
-            .catch(() => res.status(500).send({ error: 500, message: 'An error occurred while uploading the image' }));
+            .then(url => {
+                newTask.imageUrl = url;
+                return taskDB.insertOne(newTask);
+            })
+            .then(() => {
+                res.status(200).send(newTask);
+            })
+            .catch(err => {
+                console.log(err);
+                res.status(500).send({ error: 500, message: 'An error occurred while trying to create the task' });
+            });
     });
 });
 
