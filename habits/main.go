@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"fmt"
 
 	"github.com/LuisPalominoTrevilla/TaskManagerSystemBackend/db"
 	"github.com/joho/godotenv"
@@ -11,6 +12,8 @@ import (
 func main() {
 
 	godotenv.Load()
+
+	fmt.Println("Loaded .env successfully")
 
 	database := db.InitDb()
 
