@@ -35,7 +35,6 @@ module.exports = {
     },
 
     deleteFile(filename) {
-        console.log(filename);
         const params = {
             Bucket: bucket,
             Key: filename
