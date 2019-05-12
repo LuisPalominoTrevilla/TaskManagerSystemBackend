@@ -69,3 +69,4 @@ jrebel.lic
 /.lib/
 
 .env
+src/main/resources/accounts.txt

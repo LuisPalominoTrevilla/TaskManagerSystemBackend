@@ -19,11 +19,11 @@ class AccountsController extends ScalatraServlet with JacksonJsonSupport {
     "API is alive"
   }
 
-  get("/healthCheck") {
+  get("/healthCheck/?") {
     "OK"
   }
 
-  get("/accounts") {
+  get("/accounts/?") {
     try {
       Persistence.getAll
     } catch {
@@ -34,7 +34,7 @@ class AccountsController extends ScalatraServlet with JacksonJsonSupport {
     }
   }
 
-  get("/accounts/:email") {
+  get("/accounts/:email/?") {
     try {
       val accounts: List[Account] = Persistence.getAll
       accounts find {
@@ -48,7 +48,7 @@ class AccountsController extends ScalatraServlet with JacksonJsonSupport {
     }
   }
 
-  post("/accounts") {
+  post("/accounts/?") {
     try {
       val newAccount: Account = parsedBody.extract[Account]
       Persistence.insertOne(newAccount)
@@ -60,7 +60,7 @@ class AccountsController extends ScalatraServlet with JacksonJsonSupport {
     }
   }
 
-  delete("/accounts") {
+  delete("/accounts/?") {
     contentType = "text/plain"
     try {
       Persistence.deleteAll
@@ -74,7 +74,7 @@ class AccountsController extends ScalatraServlet with JacksonJsonSupport {
     }
   }
 
-  delete("/accounts/:email") {
+  delete("/accounts/:email/?") {
     contentType = "text/plain"
     try {
       Persistence.deleteOne(params("email"))
@@ -88,7 +88,7 @@ class AccountsController extends ScalatraServlet with JacksonJsonSupport {
     }
   }
 
-  post("/accounts/login") {
+  post("/accounts/login/?") {
     try {
       val credentials: Credentials = parsedBody.extract[Credentials]
       Persistence.getAll find {
