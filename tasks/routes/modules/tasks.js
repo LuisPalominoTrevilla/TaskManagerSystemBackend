@@ -43,12 +43,20 @@ router.post('/', (req, res) => {
         !strings.isEmpty(title) && !strings.isEmpty(userId) && req.files.image !== undefined;
     const validDates = moment(dueDate).format() !== 'Invalid date' &&
         (reminderDate === undefined || moment(reminderDate).format() != 'Invalid date');
+    const correctDueDate = moment(dueDate).isAfter(moment());
+    const correctReminderDate = reminderDate === undefined || moment(reminderDate).isBefore(dueDate) && moment(reminderDate).isAfter(moment());
 
     if (!completeParams) {
         return res.status(400).json({ error: 400, message: 'Required parameters missing' });
     }
     if (!validDates) {
         return res.status(400).json({ error: 400, message: 'Date field is not valid' });
+    }
+    if (!correctReminderDate) {
+        return res.status(400).json({ error: 400, message: 'reminderDate cannot be after the due date or before the current time' });
+    }
+    if (!correctDueDate) {
+        return res.status(400).json({ error: 400, message: 'dueDate cannot be before the current time' });
     }
 
     newTask.title = title;
@@ -106,6 +114,71 @@ router.post('/:taskId/complete', (req, res) => {
             existentTask.id = existentTask.taskId;
             delete existentTask.taskId;
             res.status(200).send(existentTask);
+        })
+        .catch(err => {
+            res.status(err.error).send(err);
+        });
+});
+
+router.put('/:taskId', (req, res) => {
+    const taskId = req.params.taskId;
+    let existentTask;
+    const fieldsToUpdate = {};
+
+    const { title, description, dueDate, reminder, reminderDate, completed } = req.body;
+
+    const validDates = (dueDate !== undefined || moment(dueDate).format() !== 'Invalid date') &&
+        (reminderDate === undefined || moment(reminderDate).format() != 'Invalid date');
+    const correctDueDate = dueDate === undefined || moment(dueDate).isAfter(moment());
+    const correctReminderDate = reminderDate === undefined ||
+        (dueDate === undefined || moment(reminderDate).isBefore(dueDate)) &&
+        moment(reminderDate).isAfter(moment());
+
+    if (!validDates) {
+        return res.status(400).json({ error: 400, message: 'Date field is not valid' });
+    }
+    if (!correctReminderDate) {
+        return res.status(400).json({ error: 400, message: 'reminderDate cannot be after the due date or before the current time' });
+    }
+    if (!correctDueDate) {
+        return res.status(400).json({ error: 400, message: 'dueDate cannot be before the current time' });
+    }
+
+    if (title !== undefined && !strings.isEmpty(title)) {
+        fieldsToUpdate.title = title;
+    }
+    if (description !== undefined && !strings.isEmpty(description)) {
+        fieldsToUpdate.description = description;
+    }
+    if (reminder !== undefined && reminder === '0') {
+        fieldsToUpdate.reminder = 0;
+        fieldsToUpdate.reminderDate = null;
+    } else if (reminderDate !== undefined) {
+        fieldsToUpdate.reminder = 1;
+        fieldsToUpdate.reminderDate = moment(reminderDate).format('YYYY-MM-DD HH:mm:ss');
+    }
+    if (dueDate !== undefined) {
+        fieldsToUpdate.dueDate = moment(dueDate).format('YYYY-MM-DD HH:mm:ss');
+    }
+    if (completed !== undefined && (completed === '1' || completed === '0')) {
+        fieldsToUpdate.completed = parseInt(completed);
+    }
+
+    taskDB.findById(taskId)
+        .then(result => {
+            existentTask = result;
+            return taskDB.update(fieldsToUpdate, { taskId });
+        })
+        .then(() => {
+            const updatedtask = {
+                ...existentTask,
+                ...fieldsToUpdate
+            };
+            updatedtask.reminder = updatedtask.reminder !== 0;
+            updatedtask.completed = updatedtask.completed !== 0;
+            updatedtask.id = updatedtask.taskId;
+            delete updatedtask.taskId;
+            res.status(200).send(updatedtask);
         })
         .catch(err => {
             res.status(err.error).send(err);
