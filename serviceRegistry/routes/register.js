@@ -18,7 +18,7 @@ router.post('/', (req, res) => {
         service === Constants.names.reportsMicroservice;
 
     if (!validService) {
-        return res.status(502).send({ error: 502, message: 'Service is not required or existent' });
+        return res.status(502).send({ error: 502, message: 'Service is neither required nor existent' });
     }
     redis.isServiceRegistered(service, ip, port)
         .then(alreadyExists => {
