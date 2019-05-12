@@ -1,6 +1,6 @@
 const express = require('express');
-const redis = require('../modules/redis');
 const Constants = require('../constants.json');
+const registry = require('../modules/registry');
 const router = express.Router();
 
 router.post('/', (req, res) => {
@@ -20,15 +20,9 @@ router.post('/', (req, res) => {
     if (!validService) {
         return res.status(502).send({ error: 502, message: 'Service is neither required nor existent' });
     }
-    redis.isServiceRegistered(service, ip, port)
-        .then(alreadyExists => {
-            if (alreadyExists) {
-                throw { error: 409, message: 'Service is already registered' };
-            }
-            return redis.addServiceToRegistry(service, ip, port);
-        })
+    registry.registerService(service, ip, port)
         .then(() => {
-            res.status(200).send({ message: 'Service registered succesfully' });
+            res.status(200).send({ message: 'Service registered correctly' });
         })
         .catch(err => {
             res.status(err.error).send(err);
