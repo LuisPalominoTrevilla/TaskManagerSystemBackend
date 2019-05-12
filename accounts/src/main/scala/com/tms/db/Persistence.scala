@@ -41,7 +41,6 @@ object Persistence {
             AWSBucket.uploadFile(file)
             FileModifier.deleteFile(file)
         } else {
-            FileModifier.deleteFile(file)
             throw new Error("Account already exists")
         }
         account
