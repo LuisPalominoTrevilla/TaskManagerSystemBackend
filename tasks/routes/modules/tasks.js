@@ -150,7 +150,7 @@ router.put('/:taskId', (req, res) => {
     if (description !== undefined && !strings.isEmpty(description)) {
         fieldsToUpdate.description = description;
     }
-    if (reminder !== undefined && reminder === '0') {
+    if (reminder !== undefined && reminder === 'false') {
         fieldsToUpdate.reminder = 0;
         fieldsToUpdate.reminderDate = null;
     } else if (reminderDate !== undefined) {
@@ -160,8 +160,8 @@ router.put('/:taskId', (req, res) => {
     if (dueDate !== undefined) {
         fieldsToUpdate.dueDate = moment(dueDate).format('YYYY-MM-DD HH:mm:ss');
     }
-    if (completed !== undefined && (completed === '1' || completed === '0')) {
-        fieldsToUpdate.completed = parseInt(completed);
+    if (completed !== undefined && (completed === 'true' || completed === 'false')) {
+        fieldsToUpdate.completed = (completed === 'true') ? 1 : 0;
     }
 
     taskDB.findById(taskId)
