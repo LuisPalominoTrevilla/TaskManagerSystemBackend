@@ -23,7 +23,7 @@ router.post('/', (req, res) => {
     redis.isServiceRegistered(service, ip, port)
         .then(alreadyExists => {
             if (alreadyExists) {
-                return res.status(409).send({ status: 409, message: 'Service is already registered' });
+                throw { error: 409, message: 'Service is already registered' };
             }
             return redis.addServiceToRegistry(service, ip, port);
         })
@@ -31,8 +31,7 @@ router.post('/', (req, res) => {
             res.status(200).send({ message: 'Service registered succesfully' });
         })
         .catch(err => {
-            console.log(err);
-            res.status(500).send({ status: 500, message: 'There was an error while registering the service' });
+            res.status(err.error).send(err);
         });
 });
 

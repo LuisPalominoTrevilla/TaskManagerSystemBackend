@@ -6,7 +6,7 @@ module.exports = {
         const server = `http://${host}:${port}`;
         return new Promise((resolve, reject) => {
             client.SADD(serviceName, server, (err, res) => {
-                if (err) reject(err);
+                if (err) reject({ error: 500, message: 'There was an error while registering the service' });
                 else resolve();
             });
         });
@@ -16,7 +16,7 @@ module.exports = {
         const server = `http://${host}:${port}`;
         return new Promise((resolve, reject) => {
             client.SISMEMBER(serviceName, server, (err, res) => {
-                if (err) return reject(err);
+                if (err) return reject({ error: 500, message: err.message });
                 resolve(res === 1);
             });
         })
