@@ -8,8 +8,8 @@ router.post('/', (req, res) => {
     if (ip === '1') {
         ip = '127.0.0.1';
     }
-    const { port, service } = req.body;
-    if (port === undefined || service === undefined) {
+    const { port, service, healthCheck } = req.body;
+    if (port === undefined || service === undefined || healthCheck === undefined) {
         return res.status(400).send({ error: 400, message: 'Missing params' });
     }
     const validService = service === Constants.names.accountsMicroservice ||
@@ -20,7 +20,7 @@ router.post('/', (req, res) => {
     if (!validService) {
         return res.status(502).send({ error: 502, message: 'Service is neither required nor existent' });
     }
-    registry.registerService(service, ip, port)
+    registry.registerService(service, ip, port, healthCheck)
         .then(() => {
             res.status(200).send({ message: 'Service registered correctly' });
         })
