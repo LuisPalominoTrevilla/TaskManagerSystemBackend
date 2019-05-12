@@ -195,6 +195,8 @@ func (controller *HabitsController) CreateHabit(w http.ResponseWriter, r *http.R
 
 	habit.ID = result.InsertedID.(primitive.ObjectID)
 	w.Header().Add("Content-Type", "application/json")
+	habit.Image = ""
+	habit.UserEmail = ""
 	encoder := json.NewEncoder(w)
 	encoder.Encode(habit)
 }
