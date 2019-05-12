@@ -13,7 +13,7 @@
       "url": "https://opensource.org/licenses/MIT"
     }
   },
-  "host": "localhost:3000",
+  "host": "localhost",
   "basePath": "/api/v1",
   "tags": [
     {
@@ -39,6 +39,31 @@
   ],
   "paths": {
     "/accounts": {
+      "get": {
+        "tags": [
+          "account"
+        ],
+        "summary": "Retrieve all accounts",
+        "description": "",
+        "operationId": "getAllAccounts",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Account"
+              }
+            }
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      },
       "post": {
         "tags": [
           "account"
@@ -74,9 +99,25 @@
             "description": "Invalid input"
           }
         }
+      },
+      "delete": {
+        "tags": [
+          "account"
+        ],
+        "summary": "Delete all accounts",
+        "description": "",
+        "operationId": "deleteAllAccount",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Account not found"
+          }
+        }
       }
     },
-    "/accounts/{accountId}": {
+    "/accounts/{accountEmail}": {
       "delete": {
         "tags": [
           "account"
@@ -86,9 +127,9 @@
         "operationId": "deleteAccount",
         "parameters": [
           {
-            "name": "accountId",
+            "name": "accountEmail",
             "in": "path",
-            "description": "ID account to delete",
+            "description": "Email of account to delete",
             "required": true,
             "type": "string"
           }
@@ -100,14 +141,7 @@
           "404": {
             "description": "Account not found"
           }
-        },
-        "security": [
-          {
-            "task_system_auth": [
-              "write:account"
-            ]
-          }
-        ]
+        }
       }
     },
     "/accounts/login": {
@@ -139,7 +173,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/LoggedAccount"
+              "$ref": "#/definitions/Account"
             }
           },
           "400": {
@@ -151,35 +185,7 @@
         }
       }
     },
-    "/accounts/logout": {
-      "post": {
-        "tags": [
-          "account"
-        ],
-        "summary": "logout a user from the system",
-        "description": "",
-        "operationId": "accountLogout",
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          }
-        },
-        "security": [
-          {
-            "task_system_auth": [
-              "write:account"
-            ]
-          }
-        ]
-      }
-    },
-    "/accounts/{accountId}/habits": {
+    "/accounts/{accountEmail}/habits": {
       "get": {
         "tags": [
           "account"
@@ -189,9 +195,9 @@
         "operationId": "getAccountHabits",
         "parameters": [
           {
-            "name": "accountId",
+            "name": "accountEmail",
             "in": "path",
-            "description": "Account ID",
+            "description": "Account email",
             "required": true,
             "type": "string"
           }
@@ -212,18 +218,10 @@
           "404": {
             "description": "Account not found"
           }
-        },
-        "security": [
-          {
-            "task_system_auth": [
-              "read:account",
-              "read:habit"
-            ]
-          }
-        ]
+        }
       }
     },
-    "/accounts/{accountId}/tasks": {
+    "/accounts/{accountEmail}/tasks": {
       "get": {
         "tags": [
           "account"
@@ -233,9 +231,9 @@
         "operationId": "getAccountTasks",
         "parameters": [
           {
-            "name": "accountId",
+            "name": "accountEmail",
             "in": "path",
-            "description": "Account ID",
+            "description": "Account email",
             "required": true,
             "type": "string"
           }
@@ -256,15 +254,7 @@
           "404": {
             "description": "Account not found"
           }
-        },
-        "security": [
-          {
-            "task_system_auth": [
-              "read:account",
-              "read:task"
-            ]
-          }
-        ]
+        }
       }
     },
     "/habits": {
@@ -898,26 +888,6 @@
       }
     }
   },
-  "securityDefinitions": {
-    "task_system_auth": {
-      "type": "oauth2",
-      "authorizationUrl": "http://petstore.swagger.io/oauth/dialog",
-      "flow": "implicit",
-      "scopes": {
-        "write:account": "Modify accounts",
-        "read:account": "Read accounts",
-        "write:habit": "Modify habits",
-        "read:habit": "Read habits",
-        "write:task": "Modify tasks",
-        "read:task": "Read tasks"
-      }
-    },
-    "api_key": {
-      "type": "apiKey",
-      "name": "api_key",
-      "in": "header"
-    }
-  },
   "definitions": {
     "Account": {
       "type": "object",
@@ -934,17 +904,6 @@
           "type": "string"
         },
         "password": {
-          "type": "string"
-        }
-      }
-    },
-    "LoggedAccount": {
-      "type": "object",
-      "properties": {
-        "token": {
-          "type": "string"
-        },
-        "id": {
           "type": "string"
         }
       }
