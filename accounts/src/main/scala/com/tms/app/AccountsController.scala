@@ -3,16 +3,22 @@ package com.tms.app
 import org.scalatra._
 import org.json4s.{DefaultFormats, Formats}
 import org.scalatra.json._
+import org.scalatra.CorsSupport
 
 import com.tms.db.Persistence
 import com.tms.models._
 
-class AccountsController extends ScalatraServlet with JacksonJsonSupport {
+class AccountsController extends ScalatraServlet with JacksonJsonSupport with CorsSupport {
 
   protected implicit lazy val jsonFormats: Formats = DefaultFormats
 
   before() {
     contentType = formats("json")
+  }
+
+  options("/*"){
+    response.setHeader(
+      "Access-Control-Allow-Headers", request.getHeader("Access-Control-Request-Headers"));
   }
 
   get("/") {
