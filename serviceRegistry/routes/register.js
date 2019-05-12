@@ -16,12 +16,12 @@ router.post('/', (req, res) => {
         service === Constants.names.tasksMicroservice ||
         service === Constants.names.habitsMicroservice ||
         service === Constants.names.reportsMicroservice;
-
     if (!validService) {
         return res.status(502).send({ error: 502, message: 'Service is neither required nor existent' });
     }
     registry.registerService(service, ip, port, healthCheck)
         .then(() => {
+            console.log('Registering service');
             res.status(200).send({ message: 'Service registered correctly' });
         })
         .catch(err => {

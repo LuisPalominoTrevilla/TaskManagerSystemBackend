@@ -11,6 +11,15 @@ module.exports = {
         });
     },
 
+    getServicesFromRegistry(serviceName) {
+        return new Promise(resolve => {
+            client.SMEMBERS(serviceName, (err, members) => {
+                if (err) reject({ error: 500, message: err.message });
+                else resolve(members);
+            });
+        });
+    },
+
     isServiceRegistered(serviceName, server) {
         return new Promise((resolve, reject) => {
             client.SISMEMBER(serviceName, server, (err, res) => {

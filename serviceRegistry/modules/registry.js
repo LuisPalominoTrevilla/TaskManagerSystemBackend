@@ -15,16 +15,7 @@ module.exports = {
                 .then(() => {
                     return redis.addHealthCheck(server, healthCheck);
                 })
-                .then(() => {
-                    healthChecker(server)
-                        .then(resolve)
-                        .catch(err => {
-                            this.unregisterService(service, server)
-                                .finally(() => {
-                                    reject(err);
-                                });
-                        });
-                })
+                .then(resolve)
                 .catch(reject);
         });
     },
