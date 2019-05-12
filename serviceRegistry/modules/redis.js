@@ -20,6 +20,15 @@ module.exports = {
         });
     },
 
+    getRandomService(serviceName) {
+        return new Promise(resolve => {
+            client.SRANDMEMBER(serviceName, (err, member) => {
+                if (err) reject({ error: 500, message: err.message });
+                else resolve(member);
+            });
+        });
+    },
+
     isServiceRegistered(serviceName, server) {
         return new Promise((resolve, reject) => {
             client.SISMEMBER(serviceName, server, (err, res) => {

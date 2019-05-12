@@ -1,39 +1,106 @@
 const express = require('express');
 const moment = require('moment-timezone');
-const router = express.Router();
 const request = require('request');
+const registry = require('../../modules/registry');
 
 moment.tz.setDefault('America/Mexico_City');
 
-router.post('/*', (req, res) => {
-    let contentType = req.headers['content-type'];
-    if (contentType === undefined) {
+module.exports = function(microservice) {
+    const router = express.Router();
 
-        return;
-    }
-    contentType = contentType.split(';')[0];
-    if (contentType === 'multipart/form-data') {
-        request.post(`http://127.0.0.1:4002/tasks${req.url}`, {formData: req.body})
-            .pipe(res);
-    }
-});
+    router.get('/*', (req, res) => {
+        registry.getAvailableHost(microservice)
+            .then(host => {
+                const requestedUrl = `${host}/${microservice}${req.url}`;
+                request.get(requestedUrl).pipe(res);
+            })
+            .catch(err => {
+                res.status(err.error).send(err);
+            });
+    });
 
-router.put('/*', (req, res) => {
-    let contentType = req.headers['content-type'];
-    if (contentType === undefined) {
+    router.post('/*', (req, res) => {
+        registry.getAvailableHost(microservice)
+            .then(host => {
+                const requestedUrl = `${host}/${microservice}${req.url}`;
+                const sendData = {};
 
-        return;
-    }
-    contentType = contentType.split(';')[0];
-    if (contentType === 'application/x-www-form-urlencoded') {
-        request.put(`http://127.0.0.1:4002/tasks${req.url}`, {form: req.body})
-            .pipe(res);
-    } else if (contentType === 'multipart/form-data') {
+                let contentType = req.headers['content-type'];
+                if (contentType === undefined) {
+                    res.status(406).send({ error: 406, message: 'Content type is not supported' });
+                    return;  
+                }
+                contentType = contentType.split(';')[0];
 
-    } else {
-        res.status(406).send({ error: 406, message: 'Content type is not supported' });
-    }
-    console.log(contentType);
-});
+                switch(contentType) {
+                    case 'multipart/form-data':
+                        sendData.formData = req.body;
+                    break;
+                    case 'application/json':
+                        sendData.json = req.body;
+                    break;
+                    case 'application/x-www-form-urlencoded':
+                        sendData.form = req.body;
+                    break;
+                    default:
+                        res.status(406).send({ error: 406, message: 'Content type is not supported' });
+                        return; 
+                }
+                request.post(requestedUrl, sendData)
+                    .pipe(res);
+            })
+            .catch(err => {
+                res.status(err.error).send(err);
+            });
+    });
+    
+    router.put('/*', (req, res) => {
+        registry.getAvailableHost(microservice)
+            .then(host => {
+                const requestedUrl = `${host}/${microservice}${req.url}`;
+                const sendData = {};
 
-module.exports = router;
+                let contentType = req.headers['content-type'];
+                if (contentType === undefined) {
+                    res.status(406).send({ error: 406, message: 'Content type is not supported' });
+                    return;  
+                }
+                contentType = contentType.split(';')[0];
+
+                switch(contentType) {
+                    case 'multipart/form-data':
+                        sendData.formData = req.body;
+                    break;
+                    case 'application/json':
+                        sendData.json = req.body;
+                    break;
+                    case 'application/x-www-form-urlencoded':
+                        sendData.form = req.body;
+                    break;
+                    default:
+                        res.status(406).send({ error: 406, message: 'Content type is not supported' });
+                        return; 
+                }
+                request.put(requestedUrl, sendData)
+                    .pipe(res);
+            })
+            .catch(err => {
+                res.status(err.error).send(err);
+            });
+    });
+
+    router.delete('/*', (req, res) => {
+        registry.getAvailableHost(microservice)
+            .then(host => {
+                const requestedUrl = `${host}/${microservice}${req.url}`;
+                request.delete(requestedUrl).pipe(res);
+            })
+            .catch(err => {
+                res.status(err.error).send(err);
+            });
+    });
+
+    return router;
+}
+
+

@@ -29,5 +29,29 @@ module.exports = {
                 .then(resolve)
                 .catch(reject);
         });
+    },
+
+    getAvailableHost(service) {
+        return new Promise((resolve, reject) => {
+            redis.getRandomService(service)
+                .then(host => {
+                    if (host === null) {
+                        throw { error: 502, message: 'There are no available services for the moment' };
+                    }
+                    healthChecker(host)
+                        .then(() => {
+                            resolve(host);
+                        })
+                        .catch(() => {
+                            this.unregisterService(service, host)
+                                .finally(() => {
+                                    return this.getAvailableHost(service);
+                                })
+                                .then(resolve)
+                                .catch(reject);
+                        });
+                })
+                .catch(reject);
+        });
     }
 }
