@@ -10,7 +10,9 @@ class ScalatraBootstrap extends LifeCycle {
   }
 
   def registerService() {
-    val request = Http("http://127.0.0.1:3000/register").postForm(Seq("port" -> "4000", "service" -> "accounts", "healthCheck" -> "/healthCheck")).asString
+    val host = sys.env.get("REGISTRY_HOST").getOrElse("http://127.0.0.1")
+    val endpoint = sys.env.get("REGISTRY_ENDPOINT").getOrElse("/register")
+    val request = Http(host + endpoint).postForm(Seq("port" -> "4000", "service" -> "accounts", "healthCheck" -> "/healthCheck")).asString
     println(request.body);
   }
 }
