@@ -614,31 +614,21 @@
             "type": "string"
           },
           {
-            "name": "task",
-            "in": "formData",
-            "description": "Task image",
-            "required": true,
-            "type": "file"
-          },
-          {
             "name": "title",
             "in": "formData",
             "description": "Task title",
-            "required": true,
             "type": "string"
           },
           {
             "name": "description",
             "description": "Task description",
             "in": "formData",
-            "required": true,
             "type": "string"
           },
           {
             "name": "dueDate",
             "in": "formData",
             "description": "Task dueDate",
-            "required": true,
             "type": "string"
           },
           {
@@ -648,16 +638,16 @@
             "type": "boolean"
           },
           {
-            "name": "daysBefore",
+            "name": "reminderDate",
             "in": "formData",
-            "description": "Number of days to remind before due date",
-            "type": "integer"
+            "description": "Reminder date",
+            "type": "string"
           },
           {
-            "name": "hourReminder",
+            "name": "completed",
             "in": "formData",
-            "description": "Hour to remind",
-            "type": "string"
+            "description": "Task completed",
+            "type": "boolean"
           }
         ],
         "consumes": [
@@ -672,9 +662,6 @@
             "schema": {
               "$ref": "#/definitions/Task"
             }
-          },
-          "400": {
-            "description": "Incomplete data"
           },
           "404": {
             "description": "Task not found"
