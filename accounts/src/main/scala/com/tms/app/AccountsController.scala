@@ -19,6 +19,10 @@ class AccountsController extends ScalatraServlet with JacksonJsonSupport {
     "API is alive"
   }
 
+  get("/healthCheck") {
+    "OK"
+  }
+
   get("/accounts") {
     try {
       Persistence.getAll
