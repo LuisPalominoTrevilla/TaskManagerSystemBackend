@@ -14,10 +14,6 @@ git.apache.org/thrift.git v0.0.0-20181218151757-9b75e4fe745a/go.mod h1:fPE2ZNJGy
 git.apache.org/thrift.git v0.12.0/go.mod h1:fPE2ZNJGynbRyZ4dJvy6G277gSllfV2HJqblrnkyeyg=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/DataDog/zstd v1.3.5/go.mod h1:1jcaCB/ufaK+sKp1NBhlGmpz41jOoPQ35bpF36t7BBo=
-github.com/LuisPalominoTrevilla/Guessit-back v0.0.0-20190424162907-5b53e5cd83a4 h1:wc6lqMxu9Iu0iAUwCWikI0z/CFuyC4rvm2Whotyzk1U=
-github.com/LuisPalominoTrevilla/Guessit-back v0.0.0-20190424162907-5b53e5cd83a4/go.mod h1:dAPafYFvYUpdo9uYlokjX8cqQVB3qKmH9yu0pmpne2A=
-github.com/LuisPalominoTrevilla/Guessit-back v0.0.0-20190507202503-ea5b09d4cb32 h1:lqTmK/0lP5H3jutdznTSQC7PrewIrmzz2moa1HY1Jf4=
-github.com/LuisPalominoTrevilla/Guessit-back v0.0.0-20190507202503-ea5b09d4cb32/go.mod h1:juUtbnIeUXnQHOOlC1C62eDSUZTT6+vyXPV966AYW2Q=
 github.com/PuerkitoBio/purell v1.1.0/go.mod h1:c11w/QuzBsJSee3cPx9rAFu61PvFxuPbtSwDGJws/X0=
 github.com/PuerkitoBio/purell v1.1.1/go.mod h1:c11w/QuzBsJSee3cPx9rAFu61PvFxuPbtSwDGJws/X0=
 github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578/go.mod h1:uGdkoq3SwY9Y+13GIhn11/XLaGBb4BfwItxLd5jeuXE=
