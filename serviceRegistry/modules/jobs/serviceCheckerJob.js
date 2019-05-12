@@ -14,11 +14,10 @@ module.exports = function() {
         redis.getServicesFromRegistry(service)
             .then(members => {
                 async.each(members, (member, nextMember) => {
-                    console.log('Checking health from member ', member);
                     healthChecker(member)
                         .then(nextMember)
                         .catch(() => {
-                            console.log('Member is down, unregistering...');
+                            console.log(`Member ${member} is down, unregistering...`);
                             registry.unregisterService(service, member)
                                 .finally(() => nextMember());
                         });

@@ -3,6 +3,6 @@ const serviceChecker = require('./serviceCheckerJob');
 
 module.exports = {
     startJobs() {
-        new CronJob('* * * * *', serviceChecker, null, true, 'America/Mexico_City');
+        new CronJob('*/5 * * * *', serviceChecker, null, true, 'America/Mexico_City');
     }
 }
