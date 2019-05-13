@@ -178,7 +178,7 @@ func (controller *HabitsController) CreateHabit(w http.ResponseWriter, r *http.R
 		Title:     	r.MultipartForm.Value["title"][0],
 		Type: 		hType,
 		Difficulty: difficulty,
-		UserEmail:	userId,
+		UserId:	userId,
 		Image:		"/images" + imageURL,
 		Score:      0,
 	}
