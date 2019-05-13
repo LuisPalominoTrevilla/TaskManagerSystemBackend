@@ -24,9 +24,9 @@ type HabitsController struct {
 
 // Get serves as a GET request
 func (controller *HabitsController) Get(w http.ResponseWriter, r *http.Request) {
-	key, ok := r.URL.Query()["key"]
+	id, ok := r.URL.Query()["id"]
 
-	if !ok || len(key[0]) < 1 {
+	if !ok || len(id[0]) < 1 {
 		habits := controller.getAll()
 		if habits == nil {
 			w.WriteHeader(500)
@@ -44,7 +44,30 @@ func (controller *HabitsController) Get(w http.ResponseWriter, r *http.Request) 
         return
 	}
 
-	
+	habitID, err := primitive.ObjectIDFromHex(id[0])
+	if err != nil {
+		println(err.Error())
+		w.WriteHeader(500)
+		fmt.Fprint(w, "Error while intepreting the habit ID.")
+		return
+	}
+
+	filter := bson.D{{"_id", habitID}}
+
+	var habit models.Habit
+
+	err2 := controller.habitsDB.GetByID(filter, &habit)
+
+	if(err2 != nil) {
+		println(err2.Error())
+		w.WriteHeader(500)
+		fmt.Fprint(w, "Error retrieving habit from database.")
+		return
+	}
+
+	w.Header().Add("Content-Type", "application/json")
+	encoder := json.NewEncoder(w)
+	encoder.Encode(habit)
 }
 
 func (controller *HabitsController) getAll() []*models.Habit {
