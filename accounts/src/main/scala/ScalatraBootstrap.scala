@@ -7,7 +7,7 @@ class ScalatraBootstrap extends LifeCycle {
   override def init(context: ServletContext) {
     this.registerService
     context.initParameters("org.scalatra.cors.allowedOrigins") = "*"
-    context.initParameters("org.scalatra.cors.allowCredentials") = false
+    context.initParameters("org.scalatra.cors.allowCredentials") = "false"
     context.mount(new AccountsController, "/*")
   }
 
