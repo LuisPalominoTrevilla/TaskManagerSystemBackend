@@ -1,6 +1,6 @@
 package models
 
-import "github.com/mongodb/mongo-go-driver/bson/primitive"
+import "go.mongodb.org/mongo-driver/bson/primitive"
 
 //Habit is used to create a habit
 type Habit struct {
@@ -8,7 +8,7 @@ type Habit struct {
 	Title      string `json:"title"`
 	Type	   int 	  `json:"type"`
 	Difficulty int 	  `json:"difficulty"`
-	UserEmail  string `json:"userEmail"`
+	UserId     string `json:"userId"`
 	Image	   string `json:"image"`
 	Score	   int	  `json:"score"`
 }

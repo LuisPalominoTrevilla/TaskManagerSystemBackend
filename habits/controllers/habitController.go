@@ -9,7 +9,7 @@ import (
 	"strings"
 	"io"
 
-	"github.com/mongodb/mongo-go-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"github.com/mongodb/mongo-go-driver/bson"
 	database "github.com/LuisPalominoTrevilla/TaskManagerSystemBackend/db"
 	"github.com/LuisPalominoTrevilla/TaskManagerSystemBackend/models"
@@ -131,14 +131,9 @@ func (controller *HabitsController) CreateHabit(w http.ResponseWriter, r *http.R
 		fmt.Fprint(w, "Missing difficulty.")
 		return
 	}
-	/** if len(r.MultipartForm.Value["userEmail"]) == 0 {
-		w.WriteHeader(400)
-		fmt.Fprint(w, "Missing owner's email.")
-		return
-	} */
 
 	// get userEmail from header
-	userEmail := r.Header.Get("userEmail")
+	userId := r.Header.Get("userId")
 
 	// get age from image
 	hType, err := strconv.Atoi(r.MultipartForm.Value["type"][0])
@@ -183,7 +178,7 @@ func (controller *HabitsController) CreateHabit(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	imageURL := "/" + parseUserEmail(userEmail)
+	imageURL := "/" + parseUserEmail(userId)
 
 	// ensure dir exists and create final file
 	err2 := os.MkdirAll("static"+imageURL, os.ModePerm)
@@ -232,7 +227,7 @@ func (controller *HabitsController) CreateHabit(w http.ResponseWriter, r *http.R
 		Title:     	r.MultipartForm.Value["title"][0],
 		Type: 		hType,
 		Difficulty: difficulty,
-		UserEmail:	userEmail,
+		UserId:		userId,
 		Image:		"/images" + imageURL,
 		Score:      0,
 	}
@@ -250,7 +245,7 @@ func (controller *HabitsController) CreateHabit(w http.ResponseWriter, r *http.R
 	habit.ID = result.InsertedID.(primitive.ObjectID)
 	w.Header().Add("Content-Type", "application/json")
 	habit.Image = ""
-	habit.UserEmail = ""
+	habit.UserId = ""
 	encoder := json.NewEncoder(w)
 	encoder.Encode(habit)
 }
