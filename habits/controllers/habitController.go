@@ -10,6 +10,7 @@ import (
 	"io"
 
 	"github.com/mongodb/mongo-go-driver/bson/primitive"
+	"github.com/mongodb/mongo-go-driver/bson"
 	database "github.com/LuisPalominoTrevilla/TaskManagerSystemBackend/db"
 	"github.com/LuisPalominoTrevilla/TaskManagerSystemBackend/models"
 	"github.com/mongodb/mongo-go-driver/mongo"
@@ -23,7 +24,37 @@ type HabitsController struct {
 
 // Get serves as a GET request
 func (controller *HabitsController) Get(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Habits controller")
+	key, ok := r.URL.Query()["key"]
+
+	if !ok || len(key[0]) < 1 {
+		habits := controller.getAll()
+		if habits == nil {
+			w.WriteHeader(500)
+			fmt.Fprint(w, "Error retrieving habits from database.")
+			return
+		}
+		response := struct {
+			Habits []*models.Habit
+		} {
+			habits,
+		}
+		w.Header().Add("Content-Type", "application/json")
+		encoder := json.NewEncoder(w)
+		encoder.Encode(response)
+        return
+	}
+
+	
+}
+
+func (controller *HabitsController) getAll() []*models.Habit {
+	var results []*models.Habit
+	filter := bson.D{}
+	results, err := controller.habitsDB.Get(filter)
+	if(err != nil) {
+		results = nil
+	}
+	return results
 }
 
 func (controller *HabitsController) initializeController(r *mux.Router) {
