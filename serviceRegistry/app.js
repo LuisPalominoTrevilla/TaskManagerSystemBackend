@@ -2,6 +2,7 @@ require('dotenv').config();
 
 const express = require('express');
 const helmet = require('helmet');
+const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const formData = require('express-form-data');
@@ -14,6 +15,8 @@ const register = require('./routes/register');
 jobScheduler.startJobs();
 
 const app = express();
+
+app.use(cors())
 
 const options = {
     uploadDir: os.tmpdir(),
