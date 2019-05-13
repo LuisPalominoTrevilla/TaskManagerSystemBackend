@@ -11,9 +11,21 @@ const taskDB = require('../../models/task');
 moment.tz.setDefault('America/Mexico_City');
 
 router.get('/', (req, res) => {
-    res.json({
-        message: 'Hello from tasks'
-    });
+    const validQueries = new Set(['title','description','reminder','userId','completed']);
+    const filter = {};
+    for (const field in req.query) {
+        if (validQueries.has(field)) {
+            let value = req.query[field];
+            filter[field] = value;
+        }
+    }
+    taskDB.findMany(filter)
+        .then(result => {
+            res.status(200).json(result);
+        })
+        .catch(err => {
+            res.status(404).send(err);
+        });
 });
 
 router.get('/:taskId', (req, res) => {
@@ -30,7 +42,7 @@ router.get('/:taskId', (req, res) => {
             res.status(200).send(taskFound);
         })
         .catch(err => {
-            return res.status(404).send(err);
+            res.status(404).send(err);
         });
 });
 

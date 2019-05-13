@@ -15,6 +15,20 @@ const task = {
         });
     },
 
+    findMany(filter) {
+        let sql = 'SELECT * FROM tasks WHERE ';
+        for (const field in filter) {
+            sql += `${field} = ${mysql.escape(filter[field])}, `;
+        }
+        sql = sql.slice(0, -2);
+        return new Promise((resolve, reject) => {
+            db.query(sql, (err, results) => {
+                if (err) return reject({ error: 500, message: err.message });
+                resolve(results)
+            })
+        });
+    },
+
     insertOne(newTask) {
         const sql = 'INSERT INTO tasks (title, description, dueDate, reminder, reminderDate, imageUrl, userId) VALUES ?';
         const values = [
