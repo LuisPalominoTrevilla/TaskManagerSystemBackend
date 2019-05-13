@@ -16,10 +16,6 @@ class AccountsController extends ScalatraServlet with JacksonJsonSupport with Co
     contentType = formats("json")
   }
 
-  options("/*"){
-    response.setHeader("Access-Control-Allow-Origin", request.getHeader("Origin"))
-  }
-
   get("/") {
     "API is alive"
   }
