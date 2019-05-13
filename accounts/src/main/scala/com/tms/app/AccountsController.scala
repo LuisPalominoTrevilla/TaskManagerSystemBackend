@@ -17,8 +17,8 @@ class AccountsController extends ScalatraServlet with JacksonJsonSupport with Co
   }
 
   options("/*"){
-    response.setHeader(
-      "Access-Control-Allow-Headers", request.getHeader("Access-Control-Request-Headers"));
+    response.setHeader("Access-Control-Allow-Headers", request.getHeader("Access-Control-Request-Headers"))
+    response.setHeader("Access-Control-Allow-Origin", "*")
   }
 
   get("/") {
