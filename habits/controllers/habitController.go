@@ -357,10 +357,7 @@ func (controller * HabitsController) SumPoints(w http.ResponseWriter, r * http.R
 		return
 	}
 	//Set difficulty
-	difficulty := 0
-	if(models.Habit[Difficulty] == "Easy"){difficulty = 2}
-	if(models.Habit[Difficulty] == "Medium"){difficulty = 3}
-	if(models.Habit[Difficulty] == "Hard"){difficulty = 5}
+	difficulty := models.Habit[Difficulty]
 	//get score as int
 	score, err := strconv.Atoi(models.Habit[Score])
 	if err == nil{ fmt.Println(score)}
