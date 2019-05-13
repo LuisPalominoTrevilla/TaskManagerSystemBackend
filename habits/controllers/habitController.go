@@ -84,7 +84,7 @@ func (controller *HabitsController) CreateHabit(w http.ResponseWriter, r *http.R
 	} */
 
 	// get userEmail from header
-	userEmail := r.Header.Get("userEmail")
+	userId := r.Header.Get("userId")
 
 	// get age from image
 	hType, err := strconv.Atoi(r.MultipartForm.Value["type"][0])
@@ -129,7 +129,7 @@ func (controller *HabitsController) CreateHabit(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	imageURL := "/" + parseUserEmail(userEmail)
+	imageURL := "/" + parseUserEmail(userId)
 
 	// ensure dir exists and create final file
 	err2 := os.MkdirAll("static"+imageURL, os.ModePerm)
@@ -178,7 +178,7 @@ func (controller *HabitsController) CreateHabit(w http.ResponseWriter, r *http.R
 		Title:     	r.MultipartForm.Value["title"][0],
 		Type: 		hType,
 		Difficulty: difficulty,
-		UserEmail:	userEmail,
+		UserEmail:	userId,
 		Image:		"/images" + imageURL,
 		Score:      0,
 	}
