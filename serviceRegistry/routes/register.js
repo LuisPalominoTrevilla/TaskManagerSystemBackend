@@ -21,7 +21,7 @@ router.post('/', (req, res) => {
     }
     registry.registerService(service, ip, port, healthCheck)
         .then(() => {
-            console.log('Registering service');
+            console.log(`Registering service ${ip}`);
             res.status(200).send({ message: 'Service registered correctly' });
         })
         .catch(err => {

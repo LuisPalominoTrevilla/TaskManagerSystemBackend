@@ -15,7 +15,11 @@ module.exports = function(microservice) {
                 request.get(requestedUrl).pipe(res);
             })
             .catch(err => {
-                res.status(err.error).send(err);
+                let errorMessage = err;
+                if (errorMessage.error === undefined) {
+                    errorMessage = { error: 500, message: 'An error occurred on our side' };
+                }
+                res.status(errorMessage).send(errorMessage);
             });
     });
 
