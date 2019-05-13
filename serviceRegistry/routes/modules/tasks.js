@@ -42,9 +42,6 @@ module.exports = function(microservice) {
                     case 'application/x-www-form-urlencoded':
                         sendData.form = req.body;
                     break;
-                    default:
-                        res.status(406).send({ error: 406, message: 'Content type is not supported' });
-                        return; 
                 }
                 request.post(requestedUrl, sendData)
                     .pipe(res);
@@ -77,9 +74,6 @@ module.exports = function(microservice) {
                     case 'application/x-www-form-urlencoded':
                         sendData.form = req.body;
                     break;
-                    default:
-                        res.status(406).send({ error: 406, message: 'Content type is not supported' });
-                        return; 
                 }
                 request.put(requestedUrl, sendData)
                     .pipe(res);
