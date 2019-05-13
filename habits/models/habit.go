@@ -8,7 +8,7 @@ type Habit struct {
 	Title      string `json:"title"`
 	Type	   int 	  `json:"type"`
 	Difficulty int 	  `json:"difficulty"`
-	UserEmail  string `json:"userEmail"`
+	UserId     string `json:"userId"`
 	Image	   string `json:"image"`
 	Score	   int	  `json:"score"`
 }
