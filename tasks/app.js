@@ -7,6 +7,7 @@ const logger = require('morgan');
 const formData = require('express-form-data');
 const jobScheduler = require('./modules/jobs/jobScheduler');
 const os = require('os');
+const request = require('request');
 const db = require('./db/connection');
 
 const endpoints = require('./routes');
@@ -19,6 +20,10 @@ db.testConnection()
 db.setTimeZone('America/Mexico_City');
 
 const app = express();
+
+request.post(`${process.env.REGISTRY_HOST}${process.env.REGISTRY_ENDPOINT}`, {form: { port: 4002, service: 'tasks', healthCheck: '/healthecheck' }}, (err, res) => {
+    if (err) console.log('Service registry not available');
+});
 
 const options = {
     uploadDir: os.tmpdir(),
