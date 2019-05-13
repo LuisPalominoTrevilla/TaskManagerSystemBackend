@@ -28,7 +28,7 @@ func (controller *HabitsController) Get(w http.ResponseWriter, r *http.Request) 
 
 func (controller *HabitsController) initializeController(r *mux.Router) {
 	r.HandleFunc("/", controller.Get).Methods(http.MethodGet)
-	r.HandleFunc("/CreateHabit", controller.CreateHabit).Methods(http.MethodPost)
+	r.HandleFunc("/", controller.CreateHabit).Methods(http.MethodPost)
 }
 
 // SetHabitsController sets the controller for the sets up the habits controllet
