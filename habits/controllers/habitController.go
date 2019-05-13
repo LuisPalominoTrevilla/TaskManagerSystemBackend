@@ -86,6 +86,7 @@ func (controller *HabitsController) initializeController(r *mux.Router) {
 	r.HandleFunc("/", controller.Get).Methods(http.MethodGet)
 	r.HandleFunc("/", controller.CreateHabit).Methods(http.MethodPost)
 	r.HandleFunc("/{id}", controller.EditHabit).Methods(http.MethodPut)
+	r.HandleFunc("/{id}", controller.DeleteHabit).Methods(http.MethodDelete)
 }
 
 // SetHabitsController sets the controller for the sets up the habits controllet
@@ -366,4 +367,39 @@ func (controller *HabitsController) EditHabit(w http.ResponseWriter, r *http.Req
 	w.Header().Add("Content-Type", "application/json")
 	encoder := json.NewEncoder(w)
 	encoder.Encode(result)
+}
+
+func (controller *HabitsController) DeleteHabit(w http.ResponseWriter, r *http.Request) {
+
+	vars := mux.Vars(r)
+	id := vars["id"]
+
+	if len(id) < 1 {
+		w.WriteHeader(500)
+		fmt.Fprint(w, "No ID was provided.")
+		return
+	}
+
+	habitID, err := primitive.ObjectIDFromHex(id)
+
+	if err != nil {
+		println(err.Error())
+		w.WriteHeader(500)
+		fmt.Fprint(w, "Error while intepreting the habit ID.")
+		return
+	}
+
+	filter := bson.D{{"_id", habitID}}
+
+	deleteResult, err := controller.habitsDB.DeleteOne(filter)
+
+	if err != nil {
+		w.WriteHeader(500)
+		fmt.Fprint(w, "Error while deleting habit.")
+		return
+	}
+
+	w.Header().Add("Content-Type", "application/json")
+	encoder := json.NewEncoder(w)
+	encoder.Encode(deleteResult)
 }
