@@ -249,8 +249,6 @@ func (controller *HabitsController) CreateHabit(w http.ResponseWriter, r *http.R
 
 	habit.ID = result.InsertedID.(primitive.ObjectID)
 	w.Header().Add("Content-Type", "application/json")
-	habit.Image = ""
-	habit.UserId = ""
 	encoder := json.NewEncoder(w)
 	encoder.Encode(habit)
 }
@@ -364,9 +362,6 @@ func (controller *HabitsController) EditHabit(w http.ResponseWriter, r *http.Req
 		fmt.Fprint(w, "Error retrieving new values.")
 		return
 	}
-
-	result.UserId = ""
-	result.Image = ""
 	
 	w.Header().Add("Content-Type", "application/json")
 	encoder := json.NewEncoder(w)
