@@ -13,10 +13,10 @@ type HabitsDB struct {
 	Habits *mongo.Collection
 }
 
-func (db *HabitsDB) GetByID(filter bson.D, result *models.User) error {
+func (db *HabitsDB) GetByID(filter bson.D, result *models.Habit) error {
 	return db.Habits.FindOne(context.TODO(), filter).Decode(&result)
 }
 
-func (db *HabitsDB) Insert(user models.User) (*mongo.InsertOneResult, error) {
-	return db.Habits.InsertOne(context.TODO(), user)
+func (db *HabitsDB) Insert(habit models.Habit) (*mongo.InsertOneResult, error) {
+	return db.Habits.InsertOne(context.TODO(), habit)
 }
