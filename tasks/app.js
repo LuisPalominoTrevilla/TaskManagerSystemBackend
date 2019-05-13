@@ -2,6 +2,7 @@ require('dotenv').config();
 
 const express = require('express');
 const helmet = require('helmet');
+const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const formData = require('express-form-data');
@@ -20,6 +21,8 @@ db.testConnection()
 db.setTimeZone('America/Mexico_City');
 
 const app = express();
+
+app.use(cors());
 
 request.post(`${process.env.REGISTRY_HOST}${process.env.REGISTRY_ENDPOINT}`, {form: { port: 4002, service: 'tasks', healthCheck: '/healthecheck' }}, (err, res) => {
     if (err) console.log('Service registry not available');

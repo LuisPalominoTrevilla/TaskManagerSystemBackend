@@ -16,7 +16,7 @@ jobScheduler.startJobs();
 
 const app = express();
 
-app.use(cors())
+app.use(cors());
 
 const options = {
     uploadDir: os.tmpdir(),
