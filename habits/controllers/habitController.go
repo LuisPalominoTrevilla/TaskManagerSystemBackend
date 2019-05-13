@@ -364,6 +364,9 @@ func (controller *HabitsController) EditHabit(w http.ResponseWriter, r *http.Req
 		fmt.Fprint(w, "Error retrieving new values.")
 		return
 	}
+
+	result.UserId = ""
+	result.Image = ""
 	
 	w.Header().Add("Content-Type", "application/json")
 	encoder := json.NewEncoder(w)
