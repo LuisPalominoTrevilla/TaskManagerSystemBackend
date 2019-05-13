@@ -3,15 +3,26 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "start": "FORCE_COLOR=1 nodemon ./bin/www"
+    "start": "nodemon ./bin/www"
   },
   "dependencies": {
     "async": "^2.6.1",
+    "aws-sdk": "^2.453.0",
     "cookie-parser": "~1.4.3",
+    "cron": "1.7.1",
     "debug": "~2.6.9",
+    "dotenv": "8.0.0",
     "express": "~4.16.0",
+    "express-form-data": "2.0.8",
+    "file-type": "11.0.0",
     "helmet": "3.15.0",
+    "moment": "2.24.0",
+    "moment-timezone": "0.5.25",
     "morgan": "~1.9.0",
-    "nodemon": "1.18.9"
+    "mustache": "3.0.1",
+    "mysql": "^2.17.1",
+    "nodemailer": "6.1.1",
+    "nodemon": "1.18.9",
+    "s3fs": "2.5.0"
   }
 }
