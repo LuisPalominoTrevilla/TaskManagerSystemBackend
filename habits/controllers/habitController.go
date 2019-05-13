@@ -24,9 +24,10 @@ type HabitsController struct {
 
 // Get serves as a GET request
 func (controller *HabitsController) Get(w http.ResponseWriter, r *http.Request) {
-	id, ok := r.URL.Query()["id"]
+	vars := mux.Vars(r)
+	id := vars["id"]
 
-	if !ok || len(id[0]) < 1 {
+	if len(id) < 1 {
 		habits := controller.getAll()
 		if habits == nil {
 			w.WriteHeader(500)
@@ -44,7 +45,7 @@ func (controller *HabitsController) Get(w http.ResponseWriter, r *http.Request) 
         return
 	}
 
-	habitID, err := primitive.ObjectIDFromHex(id[0])
+	habitID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		println(err.Error())
 		w.WriteHeader(500)
@@ -81,8 +82,8 @@ func (controller *HabitsController) getAll() []*models.Habit {
 }
 
 func (controller *HabitsController) initializeController(r *mux.Router) {
-	r.HandleFunc("/", controller.Get).Methods(http.MethodGet)
-	r.HandleFunc("/CreateHabit", controller.CreateHabit).Methods(http.MethodPost)
+	r.HandleFunc("/{id}", controller.Get).Methods(http.MethodGet)
+	r.HandleFunc("/", controller.CreateHabit).Methods(http.MethodPost)
 }
 
 // SetHabitsController sets the controller for the sets up the habits controllet
