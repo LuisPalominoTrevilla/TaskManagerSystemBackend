@@ -47,3 +47,8 @@ func (db *HabitsDB) Get(filter bson.D) ([]*models.Habit, error) {
 func (db *HabitsDB) UpdateOne(filter bson.D, update bson.D) (*mongo.UpdateResult, error) {
 	return db.Habits.UpdateOne(context.TODO(), filter, update)
 }
+
+// DeleteOne updates a document in the database
+func (db *HabitsDB) DeleteOne(filter bson.D) (*mongo.DeleteResult, error) {
+	return db.Habits.DeleteOne(context.TODO(), filter)
+}
