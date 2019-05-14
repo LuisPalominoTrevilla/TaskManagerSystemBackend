@@ -16,7 +16,6 @@ module.exports = function(service) {
                                 model.insertOne(record)
                                     .then(() => next())
                                     .catch(() => {
-                                        console.log('Error creating habits');
                                         next();
                                     });
                             } else {
