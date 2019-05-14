@@ -12,7 +12,6 @@ module.exports = function(microservice) {
         registry.getAvailableHost(microservice)
             .then(host => {
                 const requestedUrl = `${host}/${microservice}${req.url}`;
-                console.log(requestedUrl);
                 request.get(requestedUrl).pipe(res);
             })
             .catch(err => {

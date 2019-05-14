@@ -11,7 +11,6 @@ const abstractModel = class Model {
 
     exists({ key, id }) {
         let sql = `SELECT count(*) AS count FROM ${this.model} WHERE ${key} = ${mysql.escape(id)}`;
-        console.log(sql);
         return new Promise((resolve, reject) => {
             db.query(sql, (err, result) => {
                 if (err) return reject(err);
