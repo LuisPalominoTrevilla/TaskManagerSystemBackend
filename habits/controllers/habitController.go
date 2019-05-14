@@ -22,7 +22,7 @@ type HabitsController struct {
 	habitsDB *database.HabitsDB
 }
 
-// Get serves as a GET request
+// Get serves as a GET request for either all or one specific habit
 func (controller *HabitsController) Get(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
@@ -85,6 +85,7 @@ func (controller *HabitsController) initializeController(r *mux.Router) {
 	r.HandleFunc("/{id}", controller.Get).Methods(http.MethodGet)
 	r.HandleFunc("/", controller.Get).Methods(http.MethodGet)
 	r.HandleFunc("/", controller.CreateHabit).Methods(http.MethodPost)
+	r.HandleFunc("/{id}", controller.EditHabit).Methods(http.MethodPut)
 }
 
 // SetHabitsController sets the controller for the sets up the habits controllet
@@ -95,6 +96,7 @@ func SetHabitsController(r *mux.Router, db *mongo.Database) {
 	habitsController.initializeController(r)
 }
 
+// CreateHabit serves to receive a POST request to create a new habit
 func (controller *HabitsController) CreateHabit(w http.ResponseWriter, r *http.Request) {
 	var maxBytes int64 = 64 * 1024 * 1024
 	validImageFormats := map[string]bool{
@@ -160,13 +162,14 @@ func (controller *HabitsController) CreateHabit(w http.ResponseWriter, r *http.R
 	// get image file header
 	imFileHeader := r.MultipartForm.File["image"][0]
 	im, err := imFileHeader.Open()
-	defer im.Close()
+	
 	if err != nil {
 		println(err.Error())
 		w.WriteHeader(500)
 		fmt.Fprint(w, "Error opening the image file.")
 		return
 	}
+	defer im.Close()
 
 	if _, exists := validImageFormats[imFileHeader.Header["Content-Type"][0]]; !exists {
 		w.WriteHeader(400)
@@ -246,8 +249,6 @@ func (controller *HabitsController) CreateHabit(w http.ResponseWriter, r *http.R
 
 	habit.ID = result.InsertedID.(primitive.ObjectID)
 	w.Header().Add("Content-Type", "application/json")
-	habit.Image = ""
-	habit.UserId = ""
 	encoder := json.NewEncoder(w)
 	encoder.Encode(habit)
 }
@@ -268,4 +269,101 @@ func parseUserEmail(email string) string {
 	}
 
 	return emailParsed
+}
+
+// EditHabit serves to receive a PUT request to modify an existing habit
+func (controller *HabitsController) EditHabit(w http.ResponseWriter, r *http.Request) {
+
+	vars := mux.Vars(r)
+	id := vars["id"]
+
+	if len(id) < 1 {
+		w.WriteHeader(500)
+		fmt.Fprint(w, "No ID was provided.")
+		return
+	}
+
+	habitID, err := primitive.ObjectIDFromHex(id)
+
+	if err != nil {
+		println(err.Error())
+		w.WriteHeader(500)
+		fmt.Fprint(w, "Error while intepreting the habit ID.")
+		return
+	}
+
+	// Parse url-encoded data
+	err = r.ParseForm()
+
+	if err != nil {
+		println(err.Error())
+		w.WriteHeader(500)
+		fmt.Fprint(w, "Error while intepreting the data provided.")
+		return
+	}
+
+	if len(r.Form["title"]) == 0 {
+		w.WriteHeader(400)
+		fmt.Fprint(w, "Missing title.")
+		return
+	}
+	if len(r.Form["type"]) == 0 {
+		w.WriteHeader(400)
+		fmt.Fprint(w, "Missing type.")
+		return
+	}
+	if len(r.Form["difficulty"]) == 0 {
+		w.WriteHeader(400)
+		fmt.Fprint(w, "Missing difficulty.")
+		return
+	}
+
+	// get age from image
+	hType, err := strconv.Atoi(r.Form["type"][0])
+
+	if (err != nil || hType < -1 || hType > 1){
+		println(err.Error())
+		w.WriteHeader(400)
+		fmt.Fprint(w, "Either type was not a number or is not within the permitted range.")
+		return
+	}
+
+	difficulty, err := strconv.Atoi(r.Form["difficulty"][0])
+
+	if (err != nil){
+		println(err.Error())
+		w.WriteHeader(400)
+		fmt.Fprint(w, "Difficulty was not a number.")
+		return
+	}
+
+	filter := bson.D{{"_id", habitID}}
+
+	updateDoc := bson.D{{"$set", bson.D{{"title", r.Form["title"][0]},
+		{"type", hType},
+		{"difficulty", difficulty}}}}
+
+	_, err = controller.habitsDB.UpdateOne(filter, updateDoc)
+
+	if err != nil {
+		println(err.Error())
+		w.WriteHeader(500)
+		fmt.Fprint(w, "Error updating data in the database.")
+		return
+	}
+
+	var result models.Habit
+
+	err = controller.habitsDB.GetByID(filter, &result)
+
+	if err != nil {
+		println(err.Error())
+		w.WriteHeader(500)
+		fmt.Fprint(w, "Error retrieving new values.")
+		return
+	}
+	
+	w.Header().Add("Content-Type", "application/json")
+	encoder := json.NewEncoder(w)
+	encoder.Encode(result)
 }
