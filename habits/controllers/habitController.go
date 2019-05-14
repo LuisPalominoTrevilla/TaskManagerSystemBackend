@@ -54,7 +54,7 @@ func (controller *HabitsController) Get(w http.ResponseWriter, r *http.Request) 
 	}
 	habitID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		println(err.Error())
+		
 		w.WriteHeader(500)
 		fmt.Fprint(w, "Error while intepreting the habit ID.")
 		return
@@ -123,7 +123,7 @@ func (controller *HabitsController) CreateHabit(w http.ResponseWriter, r *http.R
 	err := r.ParseMultipartForm(maxBytes)
 
 	if err != nil {
-		println(err.Error())
+		
 		w.WriteHeader(500)
 		fmt.Fprint(w, "Error while intepreting the data provided.")
 		return
@@ -149,9 +149,13 @@ func (controller *HabitsController) CreateHabit(w http.ResponseWriter, r *http.R
 		fmt.Fprint(w, "Missing difficulty.")
 		return
 	}
+	if len(r.MultipartForm.Value["userId"]) == 0 {
+		w.WriteHeader(400)
+		fmt.Fprint(w, "Missing user ID.")
+		return
+	}
 
-	// get userEmail from header
-	userId := r.Header.Get("userId")
+	userId := r.MultipartForm.Value["userId"][0]
 
 	// get age from image
 	hType, err := strconv.Atoi(r.MultipartForm.Value["type"][0])
@@ -165,7 +169,6 @@ func (controller *HabitsController) CreateHabit(w http.ResponseWriter, r *http.R
 	difficulty, err := strconv.Atoi(r.MultipartForm.Value["difficulty"][0])
 
 	if (err != nil){
-		println(err.Error())
 		w.WriteHeader(400)
 		fmt.Fprint(w, "Difficulty was not a number.")
 		return
@@ -175,7 +178,7 @@ func (controller *HabitsController) CreateHabit(w http.ResponseWriter, r *http.R
 	im, err := imFileHeader.Open()
 	
 	if err != nil {
-		println(err.Error())
+		
 		w.WriteHeader(500)
 		fmt.Fprint(w, "Error opening the image file.")
 		return
@@ -237,7 +240,7 @@ func (controller *HabitsController) CreateHabit(w http.ResponseWriter, r *http.R
 	result, err := controller.habitsDB.Insert(habit)
 
 	if err != nil {
-		println(err.Error())
+		
 		_ = os.Remove(("/static" + imageURL))
 		w.WriteHeader(500)
 		fmt.Fprint(w, "Error uploading image to database.")
@@ -264,7 +267,7 @@ func (controller *HabitsController) EditHabit(w http.ResponseWriter, r *http.Req
 	habitID, err := primitive.ObjectIDFromHex(id)
 
 	if err != nil {
-		println(err.Error())
+		
 		w.WriteHeader(500)
 		fmt.Fprint(w, "Error while intepreting the habit ID.")
 		return
@@ -274,7 +277,7 @@ func (controller *HabitsController) EditHabit(w http.ResponseWriter, r *http.Req
 	err = r.ParseForm()
 
 	if err != nil {
-		println(err.Error())
+		
 		w.WriteHeader(500)
 		fmt.Fprint(w, "Error while intepreting the data provided.")
 		return
@@ -287,7 +290,7 @@ func (controller *HabitsController) EditHabit(w http.ResponseWriter, r *http.Req
 	err = controller.habitsDB.GetByID(filter, &existing)
 
 	if err != nil {
-		println(err.Error())
+		
 		w.WriteHeader(500)
 		fmt.Fprint(w, "Error while contacting database.")
 		return
@@ -310,7 +313,7 @@ func (controller *HabitsController) EditHabit(w http.ResponseWriter, r *http.Req
 		newType, err = strconv.Atoi(hType)
 
 		if (err != nil || newType < -1 || newType > 1){
-			println(err.Error())
+			
 			w.WriteHeader(400)
 			fmt.Fprint(w, "Either type was not a number or is not within the permitted range.")
 			return
@@ -320,7 +323,7 @@ func (controller *HabitsController) EditHabit(w http.ResponseWriter, r *http.Req
 		newDiff, err = strconv.Atoi(hDiff)
 
 		if (err != nil){
-			println(err.Error())
+			
 			w.WriteHeader(400)
 			fmt.Fprint(w, "Difficulty was not a number.")
 			return
@@ -334,7 +337,7 @@ func (controller *HabitsController) EditHabit(w http.ResponseWriter, r *http.Req
 	_, err = controller.habitsDB.UpdateOne(filter, updateDoc)
 
 	if err != nil {
-		println(err.Error())
+		
 		w.WriteHeader(500)
 		fmt.Fprint(w, "Error updating data in the database.")
 		return
@@ -345,7 +348,7 @@ func (controller *HabitsController) EditHabit(w http.ResponseWriter, r *http.Req
 	err = controller.habitsDB.GetByID(filter, &result)
 
 	if err != nil {
-		println(err.Error())
+		
 		w.WriteHeader(500)
 		fmt.Fprint(w, "Error retrieving new values.")
 		return
@@ -370,7 +373,7 @@ func (controller *HabitsController) DeleteHabit(w http.ResponseWriter, r *http.R
 	habitID, err := primitive.ObjectIDFromHex(id)
 
 	if err != nil {
-		println(err.Error())
+		
 		w.WriteHeader(500)
 		fmt.Fprint(w, "Error while intepreting the habit ID.")
 		return
@@ -432,7 +435,7 @@ func (controller * HabitsController) CompleteHabit(w http.ResponseWriter, r * ht
 	}
 	habitID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		println(err.Error())
+		
 		w.WriteHeader(500)
 		fmt.Fprint(w, "Error while intepreting the habit ID.")
 		return
@@ -448,7 +451,7 @@ func (controller * HabitsController) CompleteHabit(w http.ResponseWriter, r * ht
 	completionStatus, err := strconv.Atoi(status)
 
 	if err != nil || completionStatus > 1 || completionStatus < 0{
-		println(err.Error())
+		
 		w.WriteHeader(500)
 		fmt.Fprint(w, "Error while intepreting the completion status: either not a number or not within range [0,1].")
 		return
@@ -479,7 +482,7 @@ func (controller * HabitsController) CompleteHabit(w http.ResponseWriter, r * ht
 	_, err = controller.habitsDB.UpdateOne(filter, updateDoc)
 
 	if err != nil {
-		println(err.Error())
+		
 		w.WriteHeader(500)
 		fmt.Fprint(w, "Error updating data in the database.")
 		return
@@ -490,7 +493,7 @@ func (controller * HabitsController) CompleteHabit(w http.ResponseWriter, r * ht
 	err = controller.habitsDB.GetByID(filter, &result)
 
 	if err != nil {
-		println(err.Error())
+		
 		w.WriteHeader(500)
 		fmt.Fprint(w, "Error retrieving new values.")
 		return
