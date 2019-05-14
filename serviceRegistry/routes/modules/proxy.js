@@ -30,22 +30,20 @@ module.exports = function(microservice) {
                 const sendData = {};
 
                 let contentType = req.headers['content-type'];
-                if (contentType === undefined) {
-                    res.status(406).send({ error: 406, message: 'Content type is not supported' });
-                    return;  
-                }
-                contentType = contentType.split(';')[0];
+                if (contentType !== undefined) {
+                    contentType = contentType.split(';')[0];
 
-                switch(contentType) {
-                    case 'multipart/form-data':
-                        sendData.formData = req.body;
-                    break;
-                    case 'application/json':
-                        sendData.json = req.body;
-                    break;
-                    case 'application/x-www-form-urlencoded':
-                        sendData.form = req.body;
-                    break;
+                    switch(contentType) {
+                        case 'multipart/form-data':
+                            sendData.formData = req.body;
+                        break;
+                        case 'application/json':
+                            sendData.json = req.body;
+                        break;
+                        case 'application/x-www-form-urlencoded':
+                            sendData.form = req.body;
+                        break;
+                    }
                 }
                 request.post(requestedUrl, sendData)
                     .pipe(res);
@@ -66,22 +64,20 @@ module.exports = function(microservice) {
                 const sendData = {};
 
                 let contentType = req.headers['content-type'];
-                if (contentType === undefined) {
-                    res.status(406).send({ error: 406, message: 'Content type is not supported' });
-                    return;  
-                }
-                contentType = contentType.split(';')[0];
+                if (contentType !== undefined) {
+                    contentType = contentType.split(';')[0];
 
-                switch(contentType) {
-                    case 'multipart/form-data':
-                        sendData.formData = req.body;
-                    break;
-                    case 'application/json':
-                        sendData.json = req.body;
-                    break;
-                    case 'application/x-www-form-urlencoded':
-                        sendData.form = req.body;
-                    break;
+                    switch(contentType) {
+                        case 'multipart/form-data':
+                            sendData.formData = req.body;
+                        break;
+                        case 'application/json':
+                            sendData.json = req.body;
+                        break;
+                        case 'application/x-www-form-urlencoded':
+                            sendData.form = req.body;
+                        break;
+                    }
                 }
                 request.put(requestedUrl, sendData)
                     .pipe(res);
