@@ -157,7 +157,6 @@ func (controller *HabitsController) CreateHabit(w http.ResponseWriter, r *http.R
 	hType, err := strconv.Atoi(r.MultipartForm.Value["type"][0])
 
 	if (err != nil || hType < -1 || hType > 1){
-		println(err.Error())
 		w.WriteHeader(400)
 		fmt.Fprint(w, "Either type was not a number or is not within the permitted range.")
 		return
