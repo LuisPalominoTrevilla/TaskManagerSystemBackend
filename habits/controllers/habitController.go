@@ -14,8 +14,10 @@ import (
 	"github.com/mongodb/mongo-go-driver/bson"
 	database "github.com/LuisPalominoTrevilla/TaskManagerSystemBackend/db"
 	"github.com/LuisPalominoTrevilla/TaskManagerSystemBackend/models"
+	"github.com/LuisPalominoTrevilla/TaskManagerSystemBackend/strategies"
 	"github.com/mongodb/mongo-go-driver/mongo"
 	"github.com/gorilla/mux"
+	"github.com/gorilla/schema"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -27,19 +29,19 @@ import (
 type HabitsController struct {
 	habitsDB *database.HabitsDB
 	currSession *s3.S3
+	strategy *strategies.MainStrategy
 }
-
 // Get serves as a GET request for either all or one specific habit
 func (controller *HabitsController) Get(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
-
 	if len(id) < 1 {
 		habits := controller.getAll()
 		if habits == nil {
-			w.WriteHeader(500)
-			fmt.Fprint(w, "Error retrieving habits from database.")
-			return
+			empty := make([]*models.Habit, 0)
+			w.Header().Add("Content-Type", "application/json")
+			encoder := json.NewEncoder(w)
+			encoder.Encode(empty)
 		}
 		response := struct {
 			Habits []*models.Habit
@@ -48,13 +50,12 @@ func (controller *HabitsController) Get(w http.ResponseWriter, r *http.Request) 
 		}
 		w.Header().Add("Content-Type", "application/json")
 		encoder := json.NewEncoder(w)
-		encoder.Encode(response)
+		encoder.Encode(response.Habits)
         return
 	}
-
 	habitID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		println(err.Error())
+		
 		w.WriteHeader(500)
 		fmt.Fprint(w, "Error while intepreting the habit ID.")
 		return
@@ -72,12 +73,10 @@ func (controller *HabitsController) Get(w http.ResponseWriter, r *http.Request) 
 		fmt.Fprint(w, "Error retrieving habit from database.")
 		return
 	}
-
 	w.Header().Add("Content-Type", "application/json")
 	encoder := json.NewEncoder(w)
 	encoder.Encode(habit)
 }
-
 func (controller *HabitsController) getAll() []*models.Habit {
 	var results []*models.Habit
 	filter := bson.D{}
@@ -87,13 +86,14 @@ func (controller *HabitsController) getAll() []*models.Habit {
 	}
 	return results
 }
-
 func (controller *HabitsController) initializeController(r *mux.Router) {
 	r.HandleFunc("/{id}", controller.Get).Methods(http.MethodGet)
 	r.HandleFunc("/", controller.Get).Methods(http.MethodGet)
 	r.HandleFunc("/", controller.CreateHabit).Methods(http.MethodPost)
+	r.HandleFunc("", controller.CreateHabit).Methods(http.MethodPost)
 	r.HandleFunc("/{id}", controller.EditHabit).Methods(http.MethodPut)
 	r.HandleFunc("/{id}", controller.DeleteHabit).Methods(http.MethodDelete)
+	r.HandleFunc("/{id}/complete", controller.CompleteHabit).Methods(http.MethodPost)
 }
 
 // SetHabitsController sets the controller for the sets up the habits controllet
@@ -105,13 +105,13 @@ func SetHabitsController(r *mux.Router, db *mongo.Database) {
 	if err != nil { 
 	// handle error
 	} 
-	cfg := aws.NewConfig().WithRegion("us-west-1").WithCredentials(creds) 
+	cfg := aws.NewConfig().WithRegion("us-west-1").WithCredentials(creds)
 	
 	habitsController := HabitsController{habitsDB: &habit}
 	habitsController.currSession = s3.New(session.New(), cfg)
+	habitsController.strategy = &strategies.MainStrategy{}
 	habitsController.initializeController(r)
 }
-
 // CreateHabit serves to receive a POST request to create a new habit
 func (controller *HabitsController) CreateHabit(w http.ResponseWriter, r *http.Request) {
 	var maxBytes int64 = 64 * 1024 * 1024
@@ -125,12 +125,11 @@ func (controller *HabitsController) CreateHabit(w http.ResponseWriter, r *http.R
 	err := r.ParseMultipartForm(maxBytes)
 
 	if err != nil {
-		println(err.Error())
+		
 		w.WriteHeader(500)
 		fmt.Fprint(w, "Error while intepreting the data provided.")
 		return
 	}
-
 	// Ensure that both the image and age are contained in multipartform
 	if len(r.MultipartForm.File["image"]) == 0 {
 		w.WriteHeader(400)
@@ -152,15 +151,18 @@ func (controller *HabitsController) CreateHabit(w http.ResponseWriter, r *http.R
 		fmt.Fprint(w, "Missing difficulty.")
 		return
 	}
+	if len(r.MultipartForm.Value["userId"]) == 0 {
+		w.WriteHeader(400)
+		fmt.Fprint(w, "Missing user ID.")
+		return
+	}
 
-	// get userEmail from header
-	userId := r.Header.Get("userId")
+	userId := r.MultipartForm.Value["userId"][0]
 
 	// get age from image
 	hType, err := strconv.Atoi(r.MultipartForm.Value["type"][0])
 
 	if (err != nil || hType < -1 || hType > 1){
-		println(err.Error())
 		w.WriteHeader(400)
 		fmt.Fprint(w, "Either type was not a number or is not within the permitted range.")
 		return
@@ -169,30 +171,26 @@ func (controller *HabitsController) CreateHabit(w http.ResponseWriter, r *http.R
 	difficulty, err := strconv.Atoi(r.MultipartForm.Value["difficulty"][0])
 
 	if (err != nil){
-		println(err.Error())
 		w.WriteHeader(400)
 		fmt.Fprint(w, "Difficulty was not a number.")
 		return
 	}
-
 	// get image file header
 	imFileHeader := r.MultipartForm.File["image"][0]
 	im, err := imFileHeader.Open()
 	
 	if err != nil {
-		println(err.Error())
+		
 		w.WriteHeader(500)
 		fmt.Fprint(w, "Error opening the image file.")
 		return
 	}
 	defer im.Close()
-
 	if _, exists := validImageFormats[imFileHeader.Header["Content-Type"][0]]; !exists {
 		w.WriteHeader(400)
 		fmt.Fprint(w, "Image file format not valid.")
 		return
 	}
-
 	if imFileHeader.Size/1000000 > 5 {
 		w.WriteHeader(413)
 		fmt.Fprint(w, "La imagen pesa más de 5 MB.")
@@ -244,35 +242,16 @@ func (controller *HabitsController) CreateHabit(w http.ResponseWriter, r *http.R
 	result, err := controller.habitsDB.Insert(habit)
 
 	if err != nil {
-		println(err.Error())
+		
 		_ = os.Remove(("/static" + imageURL))
 		w.WriteHeader(500)
 		fmt.Fprint(w, "Error uploading image to database.")
 		return
 	}
-
 	habit.ID = result.InsertedID.(primitive.ObjectID)
 	w.Header().Add("Content-Type", "application/json")
 	encoder := json.NewEncoder(w)
 	encoder.Encode(habit)
-}
-
-func fileExists(fileName string) bool {
-	_, err := os.Stat(fileName)
-	return !os.IsNotExist(err)
-}
-
-func parseUserEmail(email string) string {
-	emailParsed := ""
-
-	for i:=0; i < len(email); i++ {
-		if(email[i] == '@') {
-			break
-		} 
-		emailParsed += string(email[i])
-	}
-
-	return emailParsed
 }
 
 // EditHabit serves to receive a PUT request to modify an existing habit
@@ -290,7 +269,7 @@ func (controller *HabitsController) EditHabit(w http.ResponseWriter, r *http.Req
 	habitID, err := primitive.ObjectIDFromHex(id)
 
 	if err != nil {
-		println(err.Error())
+		
 		w.WriteHeader(500)
 		fmt.Fprint(w, "Error while intepreting the habit ID.")
 		return
@@ -300,57 +279,59 @@ func (controller *HabitsController) EditHabit(w http.ResponseWriter, r *http.Req
 	err = r.ParseForm()
 
 	if err != nil {
-		println(err.Error())
+		
 		w.WriteHeader(500)
 		fmt.Fprint(w, "Error while intepreting the data provided.")
 		return
 	}
 
-	if len(r.Form["title"]) == 0 {
-		w.WriteHeader(400)
-		fmt.Fprint(w, "Missing title.")
-		return
-	}
-	if len(r.Form["type"]) == 0 {
-		w.WriteHeader(400)
-		fmt.Fprint(w, "Missing type.")
-		return
-	}
-	if len(r.Form["difficulty"]) == 0 {
-		w.WriteHeader(400)
-		fmt.Fprint(w, "Missing difficulty.")
-		return
-	}
-
-	// get age from image
-	hType, err := strconv.Atoi(r.Form["type"][0])
-
-	if (err != nil || hType < -1 || hType > 1){
-		println(err.Error())
-		w.WriteHeader(400)
-		fmt.Fprint(w, "Either type was not a number or is not within the permitted range.")
-		return
-	}
-
-	difficulty, err := strconv.Atoi(r.Form["difficulty"][0])
-
-	if (err != nil){
-		println(err.Error())
-		w.WriteHeader(400)
-		fmt.Fprint(w, "Difficulty was not a number.")
-		return
-	}
-
 	filter := bson.D{{"_id", habitID}}
 
-	updateDoc := bson.D{{"$set", bson.D{{"title", r.Form["title"][0]},
-		{"type", hType},
-		{"difficulty", difficulty}}}}
+	var existing models.Habit
+
+	err = controller.habitsDB.GetByID(filter, &existing)
+
+	if err != nil {
+		
+		w.WriteHeader(500)
+		fmt.Fprint(w, "Error while contacting database.")
+		return
+	}
+
+	newTitle := existing.Title
+
+	newType := existing.Type
+
+	newDiff := existing.Difficulty
+
+	newValues := new(models.Habit) // Person being a struct type
+    decoder := schema.NewDecoder()
+
+    err = decoder.Decode(newValues, r.Form)
+    if err != nil {
+		w.WriteHeader(500)
+		fmt.Fprint(w, "Error while intepreting the input form.")
+		return
+    }
+	
+	if newValues.Title != existing.Title && len(r.Form["title"]) > 0 {
+		newTitle = newValues.Title
+	}
+	if newValues.Type != existing.Type && len(r.Form["type"]) > 0 {
+		newType = newValues.Type
+	}
+	if newValues.Difficulty != existing.Difficulty && len(r.Form["difficulty"]) > 0{
+		newDiff = newValues.Difficulty
+	}
+
+	updateDoc := bson.D{{"$set", bson.D{{"title", newTitle},
+		{"type", newType},
+		{"difficulty", newDiff}}}}
 
 	_, err = controller.habitsDB.UpdateOne(filter, updateDoc)
 
 	if err != nil {
-		println(err.Error())
+		
 		w.WriteHeader(500)
 		fmt.Fprint(w, "Error updating data in the database.")
 		return
@@ -361,7 +342,7 @@ func (controller *HabitsController) EditHabit(w http.ResponseWriter, r *http.Req
 	err = controller.habitsDB.GetByID(filter, &result)
 
 	if err != nil {
-		println(err.Error())
+		
 		w.WriteHeader(500)
 		fmt.Fprint(w, "Error retrieving new values.")
 		return
@@ -386,7 +367,7 @@ func (controller *HabitsController) DeleteHabit(w http.ResponseWriter, r *http.R
 	habitID, err := primitive.ObjectIDFromHex(id)
 
 	if err != nil {
-		println(err.Error())
+		
 		w.WriteHeader(500)
 		fmt.Fprint(w, "Error while intepreting the habit ID.")
 		return
@@ -404,7 +385,7 @@ func (controller *HabitsController) DeleteHabit(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	deleteResult, err := controller.habitsDB.DeleteOne(filter)
+	_, err = controller.habitsDB.DeleteOne(filter)
 
 	if err != nil {
 		w.WriteHeader(500)
@@ -417,7 +398,7 @@ func (controller *HabitsController) DeleteHabit(w http.ResponseWriter, r *http.R
 		Key:    aws.String(strings.Replace(existing.Image, os.Getenv("AWS_OBJECT_PREFIX")+"/"+os.Getenv("AWS_BUCKET"), "", -1)),
 	}
 
-	result, err := controller.currSession.DeleteObject(input)
+	_, err = controller.currSession.DeleteObject(input)
 
 	if err != nil {
 		if aerr, ok := err.(awserr.Error); ok {
@@ -435,7 +416,92 @@ func (controller *HabitsController) DeleteHabit(w http.ResponseWriter, r *http.R
 	}
 
 	w.Header().Add("Content-Type", "application/json")
+	fmt.Fprint(w, "OK")
+}
+
+func (controller * HabitsController) CompleteHabit(w http.ResponseWriter, r * http.Request){
+	vars := mux.Vars(r)
+	id := vars["id"]
+
+	if len(id) < 1 {
+		w.WriteHeader(500)
+		fmt.Fprint(w, "No ID was provided.")
+		return
+	}
+	
+	habitID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		
+		w.WriteHeader(500)
+		fmt.Fprint(w, "Error while intepreting the habit ID.")
+		return
+	}
+
+	err = r.ParseForm()
+
+	if err != nil {
+		w.WriteHeader(500)
+		fmt.Fprint(w, "Error parsing form.")
+		return
+	}
+
+	if len(r.Form["completionStatus"]) < 1 {
+		w.WriteHeader(500)
+		fmt.Fprint(w, "No completion status was provided.")
+		return
+	}
+
+	completionStatus, err := strconv.Atoi(r.Form["completionStatus"][0])
+
+	if err != nil || completionStatus > 1 || completionStatus < 0{
+		
+		w.WriteHeader(500)
+		fmt.Fprint(w, "Error while intepreting the completion status: either not a number or not within range [0,1].")
+		return
+	}
+
+	var habit models.Habit
+
+	filter := bson.D{{"_id", habitID}}
+
+	err = controller.habitsDB.GetByID(filter, &habit)
+
+	if err != nil {
+		w.WriteHeader(500)
+		fmt.Fprint(w, "Error retrieving habit from the database.")
+		return
+	}
+
+	if (habit.Type == 1 && completionStatus == 0) || (habit.Type == -1 && completionStatus == 1) {
+		w.WriteHeader(400)
+		fmt.Fprint(w, "Incompatible habit type and completion status.")
+		return
+	}
+
+	newScore := controller.strategy.CalculateScore(habit.Score, completionStatus, habit.Difficulty)
+
+	updateDoc := bson.D{{"$set", bson.D{{"score", newScore}}}}
+
+	_, err = controller.habitsDB.UpdateOne(filter, updateDoc)
+
+	if err != nil {
+		w.WriteHeader(500)
+		fmt.Fprint(w, "Error updating data in the database.")
+		return
+	}
+
+	var result models.Habit
+
+	err = controller.habitsDB.GetByID(filter, &result)
+
+	if err != nil {
+		
+		w.WriteHeader(500)
+		fmt.Fprint(w, "Error retrieving new values.")
+		return
+	}
+	
+	w.Header().Add("Content-Type", "application/json")
 	encoder := json.NewEncoder(w)
-	encoder.Encode(deleteResult)
 	encoder.Encode(result)
 }

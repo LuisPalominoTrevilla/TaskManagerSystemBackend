@@ -10,5 +10,5 @@ type Habit struct {
 	Difficulty int 	  `json:"difficulty"`
 	UserId     string `json:"userId"`
 	Image	   string `json:"image"`
-	Score	   int	  `json:"score"`
+	Score	   float32	  `json:"score"`
 }
