@@ -9,7 +9,7 @@ require (
 	github.com/google/btree v1.0.0 // indirect
 	github.com/google/go-cmp v0.3.0 // indirect
 	github.com/google/pprof v0.0.0-20190502144155-8358a9778bd1 // indirect
-	github.com/gorilla/mux v1.7.1
+	github.com/gorilla/mux v1.7.0
 	github.com/hashicorp/golang-lru v0.5.1 // indirect
 	github.com/jmespath/go-jmespath v0.0.0-20180206201540-c2b33e8439af
 	github.com/joho/godotenv v1.3.0

@@ -89,6 +89,7 @@ func (controller *HabitsController) initializeController(r *mux.Router) {
 	r.HandleFunc("/{id}", controller.Get).Methods(http.MethodGet)
 	r.HandleFunc("/", controller.Get).Methods(http.MethodGet)
 	r.HandleFunc("/", controller.CreateHabit).Methods(http.MethodPost)
+	r.HandleFunc("", controller.CreateHabit).Methods(http.MethodPost)
 	r.HandleFunc("/{id}", controller.EditHabit).Methods(http.MethodPut)
 	r.HandleFunc("/{id}", controller.DeleteHabit).Methods(http.MethodDelete)
 	r.HandleFunc("/{id}/{completionStatus}", controller.CompleteHabit).Methods(http.MethodPost)
