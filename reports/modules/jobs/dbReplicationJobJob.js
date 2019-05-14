@@ -1,4 +1,4 @@
-const accountsReplication = require('./accountsReplication');
+const accountsReplication = require('./serviceReplication');
 
 module.exports = function() {
     accountsReplication('accounts');
