@@ -37,7 +37,7 @@ func (controller *HabitsController) Get(w http.ResponseWriter, r *http.Request) 
 	if len(id) < 1 {
 		habits := controller.getAll()
 		if habits == nil {
-			var empty []*models.Habit
+			empty := make([]*models.Habit, 0)
 			w.Header().Add("Content-Type", "application/json")
 			encoder := json.NewEncoder(w)
 			encoder.Encode(empty)
