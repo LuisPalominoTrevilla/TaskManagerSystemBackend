@@ -19,7 +19,9 @@ module.exports = function(service) {
                                         next();
                                     });
                             } else {
-                                next();
+                                model.updateOne(record)
+                                    .then(() => next())
+                                    .catch(() => next());
                             }
                         })
                         .catch(() => {

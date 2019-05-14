@@ -48,6 +48,32 @@ const abstractModel = class Model {
         return new Promise((resolve, reject) => {
             db.query(sql, [values], err => {
                 if (err) {
+                    console.log(err);
+                    return reject(err);
+                }
+                resolve();
+            });
+        });
+    }
+
+    updateOne(fields) {
+        let sql = `UPDATE ${this.model} SET `;
+        for (const property in fields) {
+            if (property === this.idField) {
+                continue;
+            }
+            sql += `${property} = `;
+            let value = fields[property];
+            if ((typeof value !== 'number') && (new Date(value).toDateString() !== 'Invalid Date')) {
+                value = moment(value).format('YYYY-MM-DD HH:mm:ss');
+            }
+            sql += `${mysql.escape(value)},`;
+        }
+        sql = sql.slice(0, -1);
+        sql += ` WHERE ${this.idField} = ${mysql.escape(fields[this.idField])}`;
+        return new Promise((resolve, reject) => {
+            db.query(sql, err => {
+                if (err) {
                     return reject(err);
                 }
                 resolve();
