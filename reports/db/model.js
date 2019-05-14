@@ -38,7 +38,7 @@ const abstractModel = class Model {
         for (const property in fields) {
             sql += `${property},`;
             let value = fields[property];
-            if (moment(value).format() !== 'Invalid date') {
+            if ((typeof value !== 'number') && (new Date(value).toDateString() !== 'Invalid Date')) {
                 value = moment(value).format('YYYY-MM-DD HH:mm:ss');
             }
             values[0].push(value);
@@ -49,7 +49,7 @@ const abstractModel = class Model {
             db.query(sql, [values], err => {
                 if (err) {
                     console.log(err);
-                    reject(err);
+                    return reject(err);
                 }
                 resolve();
             });

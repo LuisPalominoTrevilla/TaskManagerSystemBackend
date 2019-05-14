@@ -16,7 +16,6 @@ module.exports = function(service) {
                                 model.insertOne(record)
                                     .then(() => next())
                                     .catch(() => {
-                                        console.log(`There was an error replicating ${service}`);
                                         next();
                                     });
                             } else {
