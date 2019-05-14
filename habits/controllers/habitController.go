@@ -236,7 +236,7 @@ func (controller *HabitsController) CreateHabit(w http.ResponseWriter, r *http.R
 		Type: 		hType,
 		Difficulty: difficulty,
 		UserId:		userId,
-		Image:		os.Getenv("AWS_OBJECT_PREFIX")+"/"+os.Getenv("AWS_BUCKET")+imageURL,
+		ImageURL:		os.Getenv("AWS_OBJECT_PREFIX")+"/"+os.Getenv("AWS_BUCKET")+imageURL,
 		Score:      0,
 	}
 
@@ -396,7 +396,7 @@ func (controller *HabitsController) DeleteHabit(w http.ResponseWriter, r *http.R
 
 	input := &s3.DeleteObjectInput{
 		Bucket: aws.String(os.Getenv("AWS_BUCKET")),
-		Key:    aws.String(strings.Replace(existing.Image, os.Getenv("AWS_OBJECT_PREFIX")+"/"+os.Getenv("AWS_BUCKET"), "", -1)),
+		Key:    aws.String(strings.Replace(existing.ImageURL, os.Getenv("AWS_OBJECT_PREFIX")+"/"+os.Getenv("AWS_BUCKET"), "", -1)),
 	}
 
 	_, err = controller.currSession.DeleteObject(input)
