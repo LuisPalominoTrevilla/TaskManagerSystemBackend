@@ -185,78 +185,6 @@
         }
       }
     },
-    "/accounts/{accountEmail}/habits": {
-      "get": {
-        "tags": [
-          "account"
-        ],
-        "summary": "Retrieve habits from an account",
-        "description": "",
-        "operationId": "getAccountHabits",
-        "parameters": [
-          {
-            "name": "accountEmail",
-            "in": "path",
-            "description": "Account email",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/Habit"
-              }
-            }
-          },
-          "404": {
-            "description": "Account not found"
-          }
-        }
-      }
-    },
-    "/accounts/{accountEmail}/tasks": {
-      "get": {
-        "tags": [
-          "account"
-        ],
-        "summary": "Retrieve tasks from an account",
-        "description": "",
-        "operationId": "getAccountTasks",
-        "parameters": [
-          {
-            "name": "accountEmail",
-            "in": "path",
-            "description": "Account email",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/Task"
-              }
-            }
-          },
-          "404": {
-            "description": "Account not found"
-          }
-        }
-      }
-    },
     "/habits": {
       "post": {
         "tags": [
@@ -267,7 +195,7 @@
         "operationId": "addHabit",
         "parameters": [
           {
-            "name": "habit",
+            "name": "image",
             "in": "formData",
             "description": "Habit image",
             "required": true,
@@ -293,6 +221,13 @@
             "description": "Habit difficulty",
             "required": true,
             "type": "integer"
+          },
+          {
+            "name": "userId",
+            "in": "formData",
+            "description": "Habit owner's email",
+            "required": true,
+            "type": "string"
           }
         ],
         "consumes": [
@@ -329,7 +264,7 @@
             "schema": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/Task"
+                "$ref": "#/definitions/Habit"
               }
             }
           }
@@ -353,31 +288,21 @@
             "type": "string"
           },
           {
-            "name": "habit",
-            "in": "formData",
-            "description": "Habit image",
-            "required": true,
-            "type": "file"
-          },
-          {
             "name": "title",
             "in": "formData",
             "description": "Habit title",
-            "required": true,
             "type": "string"
           },
           {
             "name": "type",
             "in": "formData",
             "description": "Habit type",
-            "required": true,
             "type": "integer"
           },
           {
             "name": "difficulty",
             "in": "formData",
             "description": "Habit difficulty",
-            "required": true,
             "type": "integer"
           }
         ],
@@ -470,6 +395,9 @@
         "summary": "Complete habit",
         "description": "",
         "operationId": "completeHabit",
+        "consumes": [
+          "multipart/form-data"
+        ],
         "parameters": [
           {
             "name": "habitId",
@@ -479,8 +407,8 @@
             "type": "string"
           },
           {
-            "name": "completion_type",
-            "in": "query",
+            "name": "completionStatus",
+            "in": "formData",
             "required": true,
             "description": "How the habit was completed",
             "type": "integer"
@@ -863,12 +791,16 @@
     "Habit": {
       "type": "object",
       "required": [
+        "id",
         "title",
         "type",
         "difficulty",
         "imageUrl"
       ],
       "properties": {
+        "id": {
+          "type": "string"
+        },
         "title": {
           "type": "string"
         },
@@ -890,6 +822,7 @@
     "Task": {
       "type": "object",
       "required": [
+        "taskId",
         "title",
         "id",
         "description",
@@ -898,7 +831,7 @@
         "userId"
       ],
       "properties": {
-        "id": {
+        "taskId": {
           "type": "string"
         },
         "title": {

@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const proxy = require('./modules/tasks');
+const proxy = require('./modules/proxy');
 
 router.get('/', (req, res, next) => {
   res.send("API is alive");
