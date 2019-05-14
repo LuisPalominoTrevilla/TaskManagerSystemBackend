@@ -1,4 +1,5 @@
 package controllers
+
 import (
 	"fmt"
 	"net/http"
@@ -76,6 +77,7 @@ func (controller *HabitsController) initializeController(r *mux.Router) {
 	r.HandleFunc("/{id}", controller.EditHabit).Methods(http.MethodPut)
 	r.HandleFunc("/{id}", controller.DeleteHabit).Methods(http.MethodDelete)
 	r.HandleFunc("/{id}", controller.SumPoints).Methods(http.MethodGet)
+	r.HandleFunc("/{id}/{completionStatus}", controller.SumPoints).Methods(http.MethodGet)
 }
 
 // SetHabitsController sets the controller for the sets up the habits controllet
@@ -351,56 +353,78 @@ func (controller * HabitsController) SumPoints(w http.ResponseWriter, r * http.R
 		fmt.Fprint(w, "Error while intepreting the habit ID.")
 		return
 	}
-	if len(models.Habits["difficulty"]) == 0 {
-		w.WriteHeader(400)
-		fmt.Fprint(w, "Missing difficulty.")
+
+	status := vars["completionStatus"]
+	if len(id) < 1 {
+		w.WriteHeader(500)
+		fmt.Fprint(w, "No completion status was provided.")
 		return
 	}
-	//Set difficulty
-	difficulty := models.Habit[Difficulty]
+
+	completionStatus, err := strconv.Atoi(status)
+
+	if err != nil || completionStatus > 1 || completionStatus < 0{
+		println(err.Error())
+		w.WriteHeader(500)
+		fmt.Fprint(w, "Error while intepreting the completion status: either not a number or not within range [0,1].")
+		return
+	}
+
+	var habit models.Habit
+
+	err = controller.habitsDB.GetByID(bson.D{{"_id", habitID}}, &habit)
+
+	if err != nil {
+		w.WriteHeader(500)
+		fmt.Fprint(w, "Error retrieving habit from the database.")
+		return
+	}
+
+	if (habit.Type == 1 && completionStatus == 0) || (habit.Type == -1 && completionStatus == 1) {
+		w.WriteHeader(400)
+		fmt.Fprint(w, "Incompatible habit type and completion status.")
+		return
+	}
+
 	//get score as int
-	score, err := strconv.Atoi(models.Habit[Score])
-	if err == nil{ fmt.Println(score)}
+	score := habit.Score
+
 	//sumar difficulty a score
 	if(score < 0){ // es rojo
-		if(models.Habit["Type"] == "good"){
-			score += difficulty
+		if(habit.Type == 1){
+			score += float32(habit.Difficulty)
 		}
-		if(models.Habit["Type"] == "bad"){
-			score -= difficulty*2
+		if(habit.Type == -1){
+			score -= float32(habit.Difficulty)*2
 		}
-	}
-	else if(score >= 0 && score < 10){ // es naranja
-		if(models.Habit["Type"] == "good"){
-			score += difficulty
+	} else if(score >= 0 && score < 10){ // es naranja
+		if(habit.Type == 1){
+			score += float32(habit.Difficulty)
 		}
-		if(models.Habit["Type"] == "bad"){
-			score -= difficulty*1.5
+		if(habit.Type == -1){
+			score -= float32(habit.Difficulty)*1.5
 		}
-	}
-	else if(score >= 10 && score < 40){ // es amarillo 
-		if(models.Habit["Type"] == "good"){
-			score += difficulty
+	} else if(score >= 10 && score < 40){ // es amarillo 
+		if(habit.Type == 1){
+			score += float32(habit.Difficulty)
 		}
-		if(models.Habit["Type"] == "bad"){
-			score -= difficulty
+		if(habit.Type == -1){
+			score -= float32(habit.Difficulty)
 		}
-	}
-	else if(score >= 40 && score < 50){
-		if(models.Habit["Type"] == "good"){
-			score += difficulty*1.5
+	} else if(score >= 40 && score < 50){
+		if(habit.Type == 1){
+			score += float32(habit.Difficulty)*1.5
 		}
-		if(models.Habit["Type"] == "bad"){
-			score -= difficulty
+		if(habit.Type == -1){
+			score -= float32(habit.Difficulty)
 		}
-	}
-	else{
-		if(models.Habit["Type"] == "good"){
-			score += difficulty*2
+	} else{
+		if(habit.Type == 1){
+			score += float32(habit.Difficulty)*2
 		}
-		if(models.Habit["Type"] == "bad"){
-			score -= difficulty
+		if(habit.Type == -1){
+			score -= float32(habit.Difficulty)
 		}
 	}
-	score = score + ""
+
 }
