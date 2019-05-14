@@ -93,7 +93,7 @@ func (controller *HabitsController) initializeController(r *mux.Router) {
 	r.HandleFunc("", controller.CreateHabit).Methods(http.MethodPost)
 	r.HandleFunc("/{id}", controller.EditHabit).Methods(http.MethodPut)
 	r.HandleFunc("/{id}", controller.DeleteHabit).Methods(http.MethodDelete)
-	r.HandleFunc("/{id}/{completionStatus}", controller.CompleteHabit).Methods(http.MethodPost)
+	r.HandleFunc("/{id}/complete", controller.CompleteHabit).Methods(http.MethodPost)
 }
 
 // SetHabitsController sets the controller for the sets up the habits controllet
@@ -422,11 +422,13 @@ func (controller *HabitsController) DeleteHabit(w http.ResponseWriter, r *http.R
 func (controller * HabitsController) CompleteHabit(w http.ResponseWriter, r * http.Request){
 	vars := mux.Vars(r)
 	id := vars["id"]
+
 	if len(id) < 1 {
 		w.WriteHeader(500)
 		fmt.Fprint(w, "No ID was provided.")
 		return
 	}
+	
 	habitID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		
@@ -435,14 +437,14 @@ func (controller * HabitsController) CompleteHabit(w http.ResponseWriter, r * ht
 		return
 	}
 
-	status := vars["completionStatus"]
-	if len(id) < 1 {
+	status := r.Form["completion_status"]
+	if len(status) < 1 {
 		w.WriteHeader(500)
 		fmt.Fprint(w, "No completion status was provided.")
 		return
 	}
 
-	completionStatus, err := strconv.Atoi(status)
+	completionStatus, err := strconv.Atoi(status[0])
 
 	if err != nil || completionStatus > 1 || completionStatus < 0{
 		
