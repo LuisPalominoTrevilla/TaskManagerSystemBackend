@@ -66,7 +66,7 @@ const task = {
             db.query(sql, (err, result) => {
                 if (err) return reject(err);
                 resolve(result);
-            })
+            });
         });
     },
 
@@ -80,7 +80,7 @@ const task = {
             db.query(sql, (err, result) => {
                 if (err) return reject(err);
                 resolve(result);
-            })
+            });
         });
     }
 }
