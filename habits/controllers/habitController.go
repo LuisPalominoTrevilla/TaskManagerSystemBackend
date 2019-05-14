@@ -37,9 +37,10 @@ func (controller *HabitsController) Get(w http.ResponseWriter, r *http.Request) 
 	if len(id) < 1 {
 		habits := controller.getAll()
 		if habits == nil {
-			w.WriteHeader(500)
-			fmt.Fprint(w, "Error retrieving habits from database.")
-			return
+			var empty []*models.Habit
+			w.Header().Add("Content-Type", "application/json")
+			encoder := json.NewEncoder(w)
+			encoder.Encode(empty)
 		}
 		response := struct {
 			Habits []*models.Habit
@@ -279,46 +280,57 @@ func (controller *HabitsController) EditHabit(w http.ResponseWriter, r *http.Req
 		fmt.Fprint(w, "Error while intepreting the data provided.")
 		return
 	}
-	if len(r.Form["title"]) == 0 {
-		w.WriteHeader(400)
-		fmt.Fprint(w, "Missing title.")
-		return
-	}
-	if len(r.Form["type"]) == 0 {
-		w.WriteHeader(400)
-		fmt.Fprint(w, "Missing type.")
-		return
-	}
-	if len(r.Form["difficulty"]) == 0 {
-		w.WriteHeader(400)
-		fmt.Fprint(w, "Missing difficulty.")
-		return
-	}
-
-	// get age from image
-	hType, err := strconv.Atoi(r.Form["type"][0])
-
-	if (err != nil || hType < -1 || hType > 1){
-		println(err.Error())
-		w.WriteHeader(400)
-		fmt.Fprint(w, "Either type was not a number or is not within the permitted range.")
-		return
-	}
-
-	difficulty, err := strconv.Atoi(r.Form["difficulty"][0])
-
-	if (err != nil){
-		println(err.Error())
-		w.WriteHeader(400)
-		fmt.Fprint(w, "Difficulty was not a number.")
-		return
-	}
 
 	filter := bson.D{{"_id", habitID}}
 
-	updateDoc := bson.D{{"$set", bson.D{{"title", r.Form["title"][0]},
-		{"type", hType},
-		{"difficulty", difficulty}}}}
+	var existing models.Habit
+
+	err = controller.habitsDB.GetByID(filter, &existing)
+
+	if err != nil {
+		println(err.Error())
+		w.WriteHeader(500)
+		fmt.Fprint(w, "Error while contacting database.")
+		return
+	}
+
+	newTitle := r.Form["title"][0]
+
+	newType := existing.Type
+
+	hType := r.Form["type"][0]
+
+	newDiff := existing.Difficulty
+
+	hDiff := r.Form["difficulty"][0]
+	
+	if len(newTitle) == 0 {
+		newTitle = existing.Title
+	}
+	if len(hType) != 0 {
+		newType, err = strconv.Atoi(hType)
+
+		if (err != nil || newType < -1 || newType > 1){
+			println(err.Error())
+			w.WriteHeader(400)
+			fmt.Fprint(w, "Either type was not a number or is not within the permitted range.")
+			return
+		}
+	}
+	if len(hDiff) != 0 {
+		newDiff, err = strconv.Atoi(hDiff)
+
+		if (err != nil){
+			println(err.Error())
+			w.WriteHeader(400)
+			fmt.Fprint(w, "Difficulty was not a number.")
+			return
+		}
+	}
+
+	updateDoc := bson.D{{"$set", bson.D{{"title", newTitle},
+		{"type", newType},
+		{"difficulty", newDiff}}}}
 
 	_, err = controller.habitsDB.UpdateOne(filter, updateDoc)
 
