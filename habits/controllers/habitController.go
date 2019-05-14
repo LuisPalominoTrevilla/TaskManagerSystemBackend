@@ -437,14 +437,21 @@ func (controller * HabitsController) CompleteHabit(w http.ResponseWriter, r * ht
 		return
 	}
 
-	status := r.Form["completion_status"]
-	if len(status) < 1 {
+	err = r.ParseForm()
+
+	if err != nil {
+		w.WriteHeader(500)
+		fmt.Fprint(w, "Error parsing form.")
+		return
+	}
+
+	if len(r.Form["completionStatus"]) < 1 {
 		w.WriteHeader(500)
 		fmt.Fprint(w, "No completion status was provided.")
 		return
 	}
 
-	completionStatus, err := strconv.Atoi(status[0])
+	completionStatus, err := strconv.Atoi(r.Form["completionStatus"][0])
 
 	if err != nil || completionStatus > 1 || completionStatus < 0{
 		
@@ -478,7 +485,6 @@ func (controller * HabitsController) CompleteHabit(w http.ResponseWriter, r * ht
 	_, err = controller.habitsDB.UpdateOne(filter, updateDoc)
 
 	if err != nil {
-		
 		w.WriteHeader(500)
 		fmt.Fprint(w, "Error updating data in the database.")
 		return
