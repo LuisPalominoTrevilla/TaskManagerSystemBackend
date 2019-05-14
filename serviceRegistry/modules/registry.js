@@ -45,10 +45,12 @@ module.exports = {
                         .catch(() => {
                             this.unregisterService(service, host)
                                 .finally(() => {
-                                    return this.getAvailableHost(service);
-                                })
-                                .then(resolve)
-                                .catch(reject);
+                                    this.getAvailableHost(service)
+                                        .then((host) => {
+                                            resolve(host);
+                                        })
+                                        .catch(reject);
+                                });
                         });
                 })
                 .catch(reject);

@@ -1,0 +1,8 @@
+{
+    "names": {
+        "accountsMicroservice": "accounts",
+        "tasksMicroservice": "tasks",
+        "habitsMicroservice": "habits",
+        "reportsMicroservice": "reports"
+    }
+}
