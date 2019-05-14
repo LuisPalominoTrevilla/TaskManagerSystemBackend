@@ -27,10 +27,30 @@ const accountsModel = class Accounts extends Model {
     getDelayedTasks(userId) {
         return new Promise((resolve, reject) => {
             const today = moment().format('YYYY-MM-DD HH:mm:ss');
-            let sql = `select * from tasks where dueDate < ${mysql.escape(today)} AND userId = ${mysql.escape(userId)}`;
+            let sql = `select * from tasks where dueDate < ${mysql.escape(today)} AND userId = ${mysql.escape(userId)} AND completed = 0`;
             db.query(sql, (err, tasks) => {
                 if (err) return reject({ error: 500, message: err.message });
                 resolve(tasks);
+            });
+        });
+    }
+
+    getGoodHabits(userId) {
+        return new Promise((resolve, reject) => {
+            let sql = `select * from habits where score > 50 AND userId = ${mysql.escape(userId)}`;
+            db.query(sql, (err, habits) => {
+                if (err) return reject({ error: 500, message: err.message });
+                resolve(habits);
+            });
+        });
+    }
+
+    getBadHabits(userId) {
+        return new Promise((resolve, reject) => {
+            let sql = `select * from habits where score < 0 AND userId = ${mysql.escape(userId)}`;
+            db.query(sql, (err, habits) => {
+                if (err) return reject({ error: 500, message: err.message });
+                resolve(habits);
             });
         });
     }

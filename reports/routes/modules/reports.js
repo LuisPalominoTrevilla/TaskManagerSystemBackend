@@ -21,6 +21,14 @@ router.get('/users/:userId', (req, res) => {
         })
         .then(tasks => {
             response.delayed = tasks;
+            return accounts.getGoodHabits(userId);
+        })
+        .then(habits => {
+            response.goodHabits = habits;
+            return accounts.getBadHabits(userId);
+        })
+        .then(habits => {
+            response.badHabits = habits;
             res.status(200).json(response);
         })
         .catch(err => {
