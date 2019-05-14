@@ -38,7 +38,7 @@ const abstractModel = class Model {
         for (const property in fields) {
             sql += `${property},`;
             let value = fields[property];
-            if ((typeof value !== 'number') && (new Date(value).toDateString() !== 'Invalid Date')) {
+            if (property.toLowerCase().includes('date')) {
                 value = moment(value).format('YYYY-MM-DD HH:mm:ss');
             }
             values[0].push(value);
@@ -48,7 +48,6 @@ const abstractModel = class Model {
         return new Promise((resolve, reject) => {
             db.query(sql, [values], err => {
                 if (err) {
-                    console.log(err);
                     return reject(err);
                 }
                 resolve();
@@ -64,7 +63,7 @@ const abstractModel = class Model {
             }
             sql += `${property} = `;
             let value = fields[property];
-            if ((typeof value !== 'number') && (new Date(value).toDateString() !== 'Invalid Date')) {
+            if (property.toLowerCase().includes('date')) {
                 value = moment(value).format('YYYY-MM-DD HH:mm:ss');
             }
             sql += `${mysql.escape(value)},`;
