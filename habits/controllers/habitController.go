@@ -7,7 +7,8 @@ import (
 	"strconv"
 	"os"
 	"strings"
-	"io"
+	"time"
+	"bytes"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"github.com/mongodb/mongo-go-driver/bson"
@@ -15,11 +16,17 @@ import (
 	"github.com/LuisPalominoTrevilla/TaskManagerSystemBackend/models"
 	"github.com/mongodb/mongo-go-driver/mongo"
 	"github.com/gorilla/mux"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/awserr"
 )
 
 // HabitsController holds important data for the habits controller
 type HabitsController struct {
 	habitsDB *database.HabitsDB
+	currSession *s3.S3
 }
 
 // Get serves as a GET request for either all or one specific habit
@@ -91,9 +98,17 @@ func (controller *HabitsController) initializeController(r *mux.Router) {
 
 // SetHabitsController sets the controller for the sets up the habits controllet
 func SetHabitsController(r *mux.Router, db *mongo.Database) {
-	habit := database.HabitsDB{Habits: db.Collection("habits")}
+	habit := database.HabitsDB{Habits: db.Collection(os.Getenv("MONGO_DB"))}
+
+	creds := credentials.NewStaticCredentials(os.Getenv("AWS_ACCESS_KEY"), os.Getenv("AWS_SECRET_KEY"), "") 
+	_, err := creds.Get() 
+	if err != nil { 
+	// handle error
+	} 
+	cfg := aws.NewConfig().WithRegion("us-west-1").WithCredentials(creds) 
 	
 	habitsController := HabitsController{habitsDB: &habit}
+	habitsController.currSession = s3.New(session.New(), cfg)
 	habitsController.initializeController(r)
 }
 
@@ -103,6 +118,7 @@ func (controller *HabitsController) CreateHabit(w http.ResponseWriter, r *http.R
 	validImageFormats := map[string]bool{
 		"image/png":  true,
 		"image/jpeg": true,
+		"image/gif": true,
 	}
 
 	// Parse multipart form data
@@ -159,7 +175,6 @@ func (controller *HabitsController) CreateHabit(w http.ResponseWriter, r *http.R
 		return
 	}
 
-
 	// get image file header
 	imFileHeader := r.MultipartForm.File["image"][0]
 	im, err := imFileHeader.Open()
@@ -184,57 +199,45 @@ func (controller *HabitsController) CreateHabit(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	imageURL := "/" + parseUserEmail(userId)
+	imageURL := "/habits/"
 
-	// ensure dir exists and create final file
-	err2 := os.MkdirAll("static"+imageURL, os.ModePerm)
-	if(err2 != nil){
-		println(err2.Error())
-	}
-	imageURL += "/"
 	filename := imFileHeader.Filename
 	filename = strings.Replace(filename, " ", "", -1)
 
-	additionalNum := ""
-
-	for fileExists("static" + imageURL + additionalNum + filename) {
-		if additionalNum == "" {
-			additionalNum = "1"
-		} else {
-			num, _ := strconv.Atoi(additionalNum)
-			num++
-			additionalNum = strconv.Itoa(num)
-		}
-	}
+	additionalNum := strconv.FormatInt(time.Now().UnixNano() / int64(time.Millisecond), 10)
 
 	imageURL += additionalNum + filename
 
-	file, err := os.Create("static" + imageURL,)
+	file, err := imFileHeader.Open()
 
-	if err != nil {
-		println(err.Error())
-		w.WriteHeader(500)
-		fmt.Fprint(w, "Error creating file.")
-		return
+	size := imFileHeader.Size
+	buffer := make([]byte, size) // read file content to buffer 
+
+	file.Read(buffer) 
+	fileBytes := bytes.NewReader(buffer) 
+	fileType := http.DetectContentType(buffer) 
+
+	params := &s3.PutObjectInput{ 
+		Bucket: aws.String(os.Getenv("AWS_BUCKET")), 
+		Key: aws.String(imageURL), 
+		Body: fileBytes, 
+		ContentLength: aws.Int64(size), 
+		ContentType: aws.String(fileType), 
 	}
 
-	defer file.Close()
-
-	// write image file to dir
-	_, err = io.Copy(file, im)
-	if err != nil {
-		println(err.Error())
+	_, err = controller.currSession.PutObject(params) 
+	if err != nil { 
 		w.WriteHeader(500)
-		fmt.Fprint(w, "Error copying the image file.")
+		fmt.Fprint(w, "Error contacting AWS.")
 		return
-	}
+	} 
 
 	habit := models.Habit{
 		Title:     	r.MultipartForm.Value["title"][0],
 		Type: 		hType,
 		Difficulty: difficulty,
 		UserId:		userId,
-		Image:		"/images" + imageURL,
+		Image:		os.Getenv("AWS_OBJECT_PREFIX")+"/"+os.Getenv("AWS_BUCKET")+imageURL,
 		Score:      0,
 	}
 
@@ -391,15 +394,48 @@ func (controller *HabitsController) DeleteHabit(w http.ResponseWriter, r *http.R
 
 	filter := bson.D{{"_id", habitID}}
 
+	var existing models.Habit
+
+	err = controller.habitsDB.GetByID(filter, &existing)
+
+	if err != nil {
+		w.WriteHeader(500)
+		fmt.Fprint(w, "Error while retrieving habit from database.")
+		return
+	}
+
 	deleteResult, err := controller.habitsDB.DeleteOne(filter)
 
 	if err != nil {
 		w.WriteHeader(500)
-		fmt.Fprint(w, "Error while deleting habit.")
+		fmt.Fprint(w, "Error while deleting habit from database.")
 		return
+	}
+
+	input := &s3.DeleteObjectInput{
+		Bucket: aws.String(os.Getenv("AWS_BUCKET")),
+		Key:    aws.String(strings.Replace(existing.Image, os.Getenv("AWS_OBJECT_PREFIX")+"/"+os.Getenv("AWS_BUCKET"), "", -1)),
+	}
+
+	result, err := controller.currSession.DeleteObject(input)
+
+	if err != nil {
+		if aerr, ok := err.(awserr.Error); ok {
+			switch aerr.Code() {
+			default:
+				w.WriteHeader(500)
+				fmt.Fprint(w, aerr.Error())
+				return
+			}
+		} else {
+			w.WriteHeader(500)
+			fmt.Fprint(w, err.Error())
+			return
+		}
 	}
 
 	w.Header().Add("Content-Type", "application/json")
 	encoder := json.NewEncoder(w)
 	encoder.Encode(deleteResult)
+	encoder.Encode(result)
 }
