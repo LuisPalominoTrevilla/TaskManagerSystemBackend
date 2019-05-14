@@ -94,6 +94,7 @@ func (controller *HabitsController) initializeController(r *mux.Router) {
 	r.HandleFunc("/{id}", controller.EditHabit).Methods(http.MethodPut)
 	r.HandleFunc("/{id}", controller.DeleteHabit).Methods(http.MethodDelete)
 	r.HandleFunc("/{id}/complete", controller.CompleteHabit).Methods(http.MethodPost)
+	r.HandleFunc("/check", controller.HealthCheck).Methods(http.MethodPost)
 }
 
 // SetHabitsController sets the controller for the sets up the habits controllet
@@ -504,4 +505,9 @@ func (controller * HabitsController) CompleteHabit(w http.ResponseWriter, r * ht
 	w.Header().Add("Content-Type", "application/json")
 	encoder := json.NewEncoder(w)
 	encoder.Encode(result)
+}
+
+func (controller * HabitsController) HealthCheck(w http.ResponseWriter, r * http.Request){
+	w.Header().Add("Content-Type", "application/json")
+	fmt.Fprint(w, "OK")
 }
