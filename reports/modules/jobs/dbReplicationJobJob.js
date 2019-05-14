@@ -1,6 +1,9 @@
-const accountsReplication = require('./serviceReplication');
+const serviceReplication = require('./serviceReplication');
 
 module.exports = function() {
-    accountsReplication('accounts');
+    serviceReplication('accounts')
+        .then(() => {
+            serviceReplication('tasks')
+        });
     // accounts.insertOne({email: 'luispalominotQ@hotmail.com', name: 'luis', password: 'luis123'});
 }

@@ -37,13 +37,20 @@ const abstractModel = class Model {
         const values = [[]];
         for (const property in fields) {
             sql += `${property},`;
-            values[0].push(fields[property]);
+            let value = fields[property];
+            if (moment(value).format() !== 'Invalid date') {
+                value = moment(value).format('YYYY-MM-DD HH:mm:ss');
+            }
+            values[0].push(value);
         }
         sql = sql.slice(0, -1);
         sql += ") VALUES ?";
         return new Promise((resolve, reject) => {
             db.query(sql, [values], err => {
-                if (err) return reject(err);
+                if (err) {
+                    console.log(err);
+                    reject(err);
+                }
                 resolve();
             });
         });

@@ -4,6 +4,7 @@ const serviceFactory = require('../../db/servicesFactory');
 const async = require('async');
 
 module.exports = function(service) {
+    console.log('replicatting', service);
     const model = serviceFactory(service);
     return new Promise(resolve => {
         requester.getRecords(service)
@@ -14,7 +15,10 @@ module.exports = function(service) {
                             if (!recordExists) {
                                 model.insertOne(record)
                                     .then(() => next())
-                                    .catch(() => next());
+                                    .catch(() => {
+                                        console.log(`There was an error replicating ${service}`);
+                                        next();
+                                    });
                             } else {
                                 next();
                             }
