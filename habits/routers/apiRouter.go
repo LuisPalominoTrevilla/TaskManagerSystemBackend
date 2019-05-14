@@ -19,5 +19,6 @@ func SetAPIRouter(r *mux.Router, db *mongo.Database) {
 	apiRouter.StrictSlash(true)
 	apiRouter.HandleFunc("/", handleAPI).Methods("GET")
 	habitRouter := apiRouter.PathPrefix("/habits").Subrouter()
+	habitRouter.StrictSlash(true)
 	controllers.SetHabitsController(habitRouter, db)
 }
