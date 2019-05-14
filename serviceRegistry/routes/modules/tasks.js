@@ -12,6 +12,7 @@ module.exports = function(microservice) {
         registry.getAvailableHost(microservice)
             .then(host => {
                 const requestedUrl = `${host}/${microservice}${req.url}`;
+                console.log(requestedUrl);
                 request.get(requestedUrl).pipe(res);
             })
             .catch(err => {
@@ -19,7 +20,7 @@ module.exports = function(microservice) {
                 if (errorMessage.error === undefined) {
                     errorMessage = { error: 500, message: 'An error occurred on our side' };
                 }
-                res.status(errorMessage).send(errorMessage);
+                res.status(errorMessage.error).send(errorMessage);
             });
     });
 
@@ -51,7 +52,11 @@ module.exports = function(microservice) {
                     .pipe(res);
             })
             .catch(err => {
-                res.status(err.error).send(err);
+                let errorMessage = err;
+                if (errorMessage.error === undefined) {
+                    errorMessage = { error: 500, message: 'An error occurred on our side' };
+                }
+                res.status(errorMessage.error).send(errorMessage);
             });
     });
     
@@ -83,7 +88,11 @@ module.exports = function(microservice) {
                     .pipe(res);
             })
             .catch(err => {
-                res.status(err.error).send(err);
+                let errorMessage = err;
+                if (errorMessage.error === undefined) {
+                    errorMessage = { error: 500, message: 'An error occurred on our side' };
+                }
+                res.status(errorMessage.error).send(errorMessage);
             });
     });
 
@@ -94,7 +103,11 @@ module.exports = function(microservice) {
                 request.delete(requestedUrl).pipe(res);
             })
             .catch(err => {
-                res.status(err.error).send(err);
+                let errorMessage = err;
+                if (errorMessage.error === undefined) {
+                    errorMessage = { error: 500, message: 'An error occurred on our side' };
+                }
+                res.status(errorMessage.error).send(errorMessage);
             });
     });
 
