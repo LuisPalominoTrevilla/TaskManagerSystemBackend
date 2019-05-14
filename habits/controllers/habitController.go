@@ -48,7 +48,7 @@ func (controller *HabitsController) Get(w http.ResponseWriter, r *http.Request) 
 		}
 		w.Header().Add("Content-Type", "application/json")
 		encoder := json.NewEncoder(w)
-		encoder.Encode(response)
+		encoder.Encode(response.Habits)
         return
 	}
 	habitID, err := primitive.ObjectIDFromHex(id)
