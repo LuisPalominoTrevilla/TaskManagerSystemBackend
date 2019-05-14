@@ -12,9 +12,16 @@ router.get('/', (req, res) => {
 router.get('/users/:userId', (req, res) => {
     const accounts = serviceFactory('accounts');
     const userId = req.params.userId;
+    const response = {};
+    
     accounts.getTasksDueToday(userId)
         .then(tasks => {
-            res.status(200).json(tasks);
+            response.dueToday = tasks;
+            return accounts.getDelayedTasks(userId);
+        })
+        .then(tasks => {
+            response.delayed = tasks;
+            res.status(200).json(response);
         })
         .catch(err => {
             res.status(err.error).send(err);

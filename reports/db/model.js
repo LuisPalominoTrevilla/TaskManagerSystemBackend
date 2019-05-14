@@ -48,7 +48,6 @@ const abstractModel = class Model {
         return new Promise((resolve, reject) => {
             db.query(sql, [values], err => {
                 if (err) {
-                    console.log(err);
                     return reject(err);
                 }
                 resolve();
