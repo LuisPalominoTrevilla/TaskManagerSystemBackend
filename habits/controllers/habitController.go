@@ -377,7 +377,7 @@ func (controller *HabitsController) DeleteHabit(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	deleteResult, err := controller.habitsDB.DeleteOne(filter)
+	_, err = controller.habitsDB.DeleteOne(filter)
 
 	if err != nil {
 		w.WriteHeader(500)
@@ -390,7 +390,7 @@ func (controller *HabitsController) DeleteHabit(w http.ResponseWriter, r *http.R
 		Key:    aws.String(strings.Replace(existing.Image, os.Getenv("AWS_OBJECT_PREFIX")+"/"+os.Getenv("AWS_BUCKET"), "", -1)),
 	}
 
-	result, err := controller.currSession.DeleteObject(input)
+	_, err = controller.currSession.DeleteObject(input)
 
 	if err != nil {
 		if aerr, ok := err.(awserr.Error); ok {
@@ -408,9 +408,7 @@ func (controller *HabitsController) DeleteHabit(w http.ResponseWriter, r *http.R
 	}
 
 	w.Header().Add("Content-Type", "application/json")
-	encoder := json.NewEncoder(w)
-	encoder.Encode(deleteResult)
-	encoder.Encode(result)
+	fmt.Fprint(w, "OK")
 }
 
 func (controller * HabitsController) CompleteHabit(w http.ResponseWriter, r * http.Request){
