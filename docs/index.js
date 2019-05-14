@@ -14,4 +14,4 @@ app.get("/index.html", (req, res) => res.send(indexContent)) // you need to do t
 app.use(express.static(pathToSwaggerUi))
 app.use('/static', express.static(path.join(__dirname, '/docfiles')))
 
-app.listen(5000)
+app.listen(3000)
