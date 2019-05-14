@@ -9,7 +9,8 @@ import (
 	"strings"
 	"io"
 
-	"github.com/mongodb/mongo-go-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"github.com/mongodb/mongo-go-driver/bson"
 	database "github.com/LuisPalominoTrevilla/TaskManagerSystemBackend/db"
 	"github.com/LuisPalominoTrevilla/TaskManagerSystemBackend/models"
 	"github.com/mongodb/mongo-go-driver/mongo"
@@ -23,10 +24,65 @@ type HabitsController struct {
 
 // Get serves as a GET request
 func (controller *HabitsController) Get(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Habits controller")
+	vars := mux.Vars(r)
+	id := vars["id"]
+
+	if len(id) < 1 {
+		habits := controller.getAll()
+		if habits == nil {
+			w.WriteHeader(500)
+			fmt.Fprint(w, "Error retrieving habits from database.")
+			return
+		}
+		response := struct {
+			Habits []*models.Habit
+		} {
+			habits,
+		}
+		w.Header().Add("Content-Type", "application/json")
+		encoder := json.NewEncoder(w)
+		encoder.Encode(response)
+        return
+	}
+
+	habitID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		println(err.Error())
+		w.WriteHeader(500)
+		fmt.Fprint(w, "Error while intepreting the habit ID.")
+		return
+	}
+
+	filter := bson.D{{"_id", habitID}}
+
+	var habit models.Habit
+
+	err2 := controller.habitsDB.GetByID(filter, &habit)
+
+	if(err2 != nil) {
+		println(err2.Error())
+		w.WriteHeader(500)
+		fmt.Fprint(w, "Error retrieving habit from database.")
+		return
+	}
+
+	w.Header().Add("Content-Type", "application/json")
+	encoder := json.NewEncoder(w)
+	encoder.Encode(habit)
+}
+
+func (controller *HabitsController) getAll() []*models.Habit {
+	var results []*models.Habit
+	filter := bson.D{}
+	results, err := controller.habitsDB.Get(filter)
+	if(err != nil) {
+		results = nil
+	}
+	return results
 }
 
 func (controller *HabitsController) initializeController(r *mux.Router) {
+	r.HandleFunc("/{id}", controller.Get).Methods(http.MethodGet)
 	r.HandleFunc("/", controller.Get).Methods(http.MethodGet)
 	r.HandleFunc("/", controller.CreateHabit).Methods(http.MethodPost)
 }
@@ -77,11 +133,6 @@ func (controller *HabitsController) CreateHabit(w http.ResponseWriter, r *http.R
 		fmt.Fprint(w, "Missing difficulty.")
 		return
 	}
-	/** if len(r.MultipartForm.Value["userEmail"]) == 0 {
-		w.WriteHeader(400)
-		fmt.Fprint(w, "Missing owner's email.")
-		return
-	} */
 
 	// get userEmail from header
 	userId := r.Header.Get("userId")
@@ -178,7 +229,7 @@ func (controller *HabitsController) CreateHabit(w http.ResponseWriter, r *http.R
 		Title:     	r.MultipartForm.Value["title"][0],
 		Type: 		hType,
 		Difficulty: difficulty,
-		UserId:	userId,
+		UserId:		userId,
 		Image:		"/images" + imageURL,
 		Score:      0,
 	}
@@ -196,7 +247,7 @@ func (controller *HabitsController) CreateHabit(w http.ResponseWriter, r *http.R
 	habit.ID = result.InsertedID.(primitive.ObjectID)
 	w.Header().Add("Content-Type", "application/json")
 	habit.Image = ""
-	habit.UserEmail = ""
+	habit.UserId = ""
 	encoder := json.NewEncoder(w)
 	encoder.Encode(habit)
 }

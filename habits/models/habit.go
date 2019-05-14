@@ -1,6 +1,6 @@
 package models
 
-import "github.com/mongodb/mongo-go-driver/bson/primitive"
+import "go.mongodb.org/mongo-driver/bson/primitive"
 
 //Habit is used to create a habit
 type Habit struct {
