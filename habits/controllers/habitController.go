@@ -17,6 +17,7 @@ import (
 	"github.com/LuisPalominoTrevilla/TaskManagerSystemBackend/strategies"
 	"github.com/mongodb/mongo-go-driver/mongo"
 	"github.com/gorilla/mux"
+	"github.com/gorilla/schema"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -297,38 +298,30 @@ func (controller *HabitsController) EditHabit(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	newTitle := r.Form["title"][0]
+	newTitle := existing.Title
 
 	newType := existing.Type
 
-	hType := r.Form["type"][0]
-
 	newDiff := existing.Difficulty
 
-	hDiff := r.Form["difficulty"][0]
+	newValues := new(models.Habit) // Person being a struct type
+    decoder := schema.NewDecoder()
+
+    err = decoder.Decode(newValues, r.Form)
+    if err != nil {
+		w.WriteHeader(500)
+		fmt.Fprint(w, "Error while intepreting the input form.")
+		return
+    }
 	
-	if len(newTitle) == 0 {
-		newTitle = existing.Title
+	if newValues.Title != existing.Title && len(r.Form["title"]) > 0 {
+		newTitle = newValues.Title
 	}
-	if len(hType) != 0 {
-		newType, err = strconv.Atoi(hType)
-
-		if (err != nil || newType < -1 || newType > 1){
-			
-			w.WriteHeader(400)
-			fmt.Fprint(w, "Either type was not a number or is not within the permitted range.")
-			return
-		}
+	if newValues.Type != existing.Type && len(r.Form["type"]) > 0 {
+		newType = newValues.Type
 	}
-	if len(hDiff) != 0 {
-		newDiff, err = strconv.Atoi(hDiff)
-
-		if (err != nil){
-			
-			w.WriteHeader(400)
-			fmt.Fprint(w, "Difficulty was not a number.")
-			return
-		}
+	if newValues.Difficulty != existing.Difficulty && len(r.Form["difficulty"]) > 0{
+		newDiff = newValues.Difficulty
 	}
 
 	updateDoc := bson.D{{"$set", bson.D{{"title", newTitle},
