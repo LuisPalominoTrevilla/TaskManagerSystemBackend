@@ -1,4 +1,4 @@
-package strategy
+package strategies
 
 // Strategy represents an interface to the basic oprations of a model
 type MainStrategy struct {
@@ -7,9 +7,9 @@ type MainStrategy struct {
 
 func (strat *MainStrategy) CalculateScore(score float32, status int, difficulty int) float32 {
 	if status == 1 {
-		score += strat.increaseScore(score, difficulty)
+		score += increaseScore(score, difficulty)
 	} else {
-		score -= strat.decreaseScore(score, difficulty)
+		score -= decreaseScore(score, difficulty)
 	}
 
 	return score

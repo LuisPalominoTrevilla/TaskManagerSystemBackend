@@ -1,4 +1,4 @@
-package strategy
+package strategies
 
 // Strategy represents an interface to the basic oprations of a model
 type Strategy interface {

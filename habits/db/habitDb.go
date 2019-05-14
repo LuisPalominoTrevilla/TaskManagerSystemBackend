@@ -23,7 +23,9 @@ func (db *HabitsDB) Get(filter bson.D) ([]*models.Habit, error) {
 		fmt.Println(err)
 		return nil, err
 	}
+
 	var result []*models.Habit
+
 	for cur.Next(context.TODO()) {
 		var habit models.Habit
 		err := cur.Decode(&habit)
