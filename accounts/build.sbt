@@ -19,7 +19,8 @@ libraryDependencies ++= Seq(
   "org.scalatra" %% "scalatra-json" % ScalatraVersion,
   "org.json4s"   %% "json4s-jackson" % "3.5.2",
   "com.amazonaws" % "aws-java-sdk" % "1.3.32",
-  "commons-io" % "commons-io" % "2.6"
+  "commons-io" % "commons-io" % "2.6",
+  "org.scalaj" %% "scalaj-http" % "2.4.1"
 )
 
 enablePlugins(ScalatraPlugin)

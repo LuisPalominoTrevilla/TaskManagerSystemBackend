@@ -5,11 +5,9 @@ const helmet = require('helmet');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
-const formData = require('express-form-data');
 const jobScheduler = require('./modules/jobs/jobScheduler');
-const os = require('os');
-const request = require('request');
 const db = require('./db/connection');
+const request = require('request');
 
 const endpoints = require('./routes');
 
@@ -24,20 +22,9 @@ const app = express();
 
 app.use(cors());
 
-request.post(`${process.env.REGISTRY_HOST}${process.env.REGISTRY_ENDPOINT}`, {form: { port: 4002, service: 'tasks', healthCheck: '/healthecheck' }}, (err, res) => {
+request.post(`${process.env.REGISTRY_HOST}${process.env.REGISTRY_ENDPOINT}`, {form: { port: 4003, service: 'reports', healthCheck: '/healthecheck' }}, (err, res) => {
     if (err) console.log('Service registry not available');
 });
-
-const options = {
-    uploadDir: os.tmpdir(),
-    autoClean: true
-};  
-
-app.use(formData.parse(options));
-app.use(formData.format());
-app.use(formData.stream());
-app.use(formData.union());
-
 
 app.use(logger('dev'));
 app.use(express.json());

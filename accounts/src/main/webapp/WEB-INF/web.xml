@@ -4,6 +4,14 @@
   xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee 
   http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
   version="3.1">
+  <context-param>
+    <param-name>org.scalatra.cors.allowCredentials</param-name>
+    <param-value>false</param-value>
+  </context-param>
+  <context-param>
+    <param-name>org.scalatra.cors.allowedOrigins</param-name>
+    <param-value>*</param-value>
+  </context-param>
 
   <!--
     This listener loads a class in the default package called ScalatraBootstrap.

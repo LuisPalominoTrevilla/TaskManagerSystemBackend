@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<body style="margin: 0;">
+    <div id="demobox" style="background-color: #FFDEAE;padding: 10px;color: #ffffff;font-size: 45px;">
+        <a style="font-family: Arial, Helvetica, sans-serif;text-align: left;color: #ffffff;font-size: 45px;margin-left: 30px;">T</a>
+    </div>
+    <div class="line-break" style="width: 95%;margin: 0 auto;">
+        <h2 style="font-family: Arial, Helvetica, sans-serif;text-align: left;color: #F7AF47;font-size: 1.7rem;font-weight: bold;position: relative;top: 5px;">FRIENDLY REMINDER</h2>
+        <hr style="width: 100%;height: 1.2px;margin-left: auto;margin-right: auto;background-color: #F7AF47;border: none;">
+    </div>
+    <div>
+        <div class="box" style="border: 1px solid #E51C23;margin: 2rem 15%;padding: 2rem;position: relative;">
+            <div class="group" style="position: relative;">
+            <div class="images" style="display: inline-block; text-align: center; width: 49%; min-height: 10rem;">
+                <img src="{{ imageUrl }}" alt="No image to show" style="width: 80%;height: 80%;object-fit: contain;margin-top: 10px;margin-left: 10px;">
+            </div>
+              <div class="text" style="position: absolute; top: 0; bottom: 0; display: inline-block; text-align: center;width: 49%;">
+                <h3 class="task" style="color: #E51C23;font-size: 2.3rem;font-weight: bold;margin-left: 10px;">{{ title }}</h3>
+                <p class="date" style="color: #8C8585;font-size: 1.3rem;margin-left: 10px;">Due: {{ dueDate }}</p>
+              </div>
+            </div>
+            <div class="description" style="color: #BBBBBB;margin-left: 10px;font-size: 1.3rem;">
+                <p style="text-align: center;">{{ description }}</p>
+            </div>
+            <img class="bell" src="https://i.imgur.com/ykIMFCYs.png" style="width: 2rem;height: 2rem;object-fit: contain;margin-top: 10px;margin-left: 10px;position: absolute;right: .6rem;bottom: .6rem;">
+        </div>
+        <div class="line-break" style="width: 95%;margin: 0 auto;">
+            <hr style="width: 100%;height: 1.2px;margin-left: auto;margin-right: auto;background-color: #F7AF47;border: none;">
+        </div>
+        <h4 style="font-family: Arial, Helvetica, sans-serif;text-align: center;color: #F7AF47;font-size: 1.2rem;margin-left: 15px;font-weight: bold;position: relative;">You've scheduled a reminder {{ reminderTime }} for this task. Please make sure to complete it and update it in the platform!</h4>
+    </div>
+    </body>
+</html>
