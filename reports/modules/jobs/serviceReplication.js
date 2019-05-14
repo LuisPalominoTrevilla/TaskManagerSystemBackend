@@ -12,10 +12,12 @@ module.exports = function(service) {
                 async.eachSeries(retrievedRecords, (record, next) => {
                     model.exists({ key: model.idField, id: record[model.idField] })
                         .then(recordExists => {
+                            console.log('Does it exist?', recordExists)
                             if (!recordExists) {
                                 model.insertOne(record)
                                     .then(() => next())
                                     .catch(() => {
+                                        console.log('Error creating habits');
                                         next();
                                     });
                             } else {

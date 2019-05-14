@@ -3,7 +3,10 @@ const serviceReplication = require('./serviceReplication');
 module.exports = function() {
     serviceReplication('accounts')
         .then(() => {
-            serviceReplication('tasks')
+            return serviceReplication('tasks');
+        })
+        .then(() => {
+            serviceReplication('habits');
         });
-    // accounts.insertOne({email: 'luispalominotQ@hotmail.com', name: 'luis', password: 'luis123'});
+
 }
