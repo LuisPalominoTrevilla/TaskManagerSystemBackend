@@ -26,5 +26,8 @@
     "nodemon": "1.18.9",
     "request": "2.88.0",
     "s3fs": "2.5.0"
+  },
+  "devDependencies": {
+    "jshint": "^2.10.2"
   }
 }

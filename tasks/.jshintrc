@@ -1,0 +1,13 @@
+{
+  "curly": true,
+  "plusplus": true,
+  "latedef": true,
+  "nocomma": true,
+  "newcap": true,
+  "undef": true,
+  "unused": true,
+  "moz": true,
+  "esversion": 6,
+  "globals":{
+  }
+}
