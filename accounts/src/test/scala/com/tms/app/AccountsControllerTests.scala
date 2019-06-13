@@ -26,8 +26,8 @@ class AccountsControllerTests extends ScalatraFunSuite {
   }
 
   test("POST /accounts should create a new account") {
-    post("/accounts/login", ) {
-      status should equal (400)
+    post("/accounts/login") {
+      status should equal (401)
     }
   }
 
